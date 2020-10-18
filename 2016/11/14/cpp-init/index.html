@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"vbill.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="注：如果赶时间可以直接跳到下一小结阅读。 今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？ tm *t &#x3D; new tm;  t-&gt;tm_year &#x3D; 2016; t-&gt;tm_mon &#x3D; 5; t-&gt;tm_min &#x3D; 9; t-&gt;tm_hour &#x3D; 9; t-&gt;tm_sec &#x3D; 30; cout &lt;&lt;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++对象的默认初始化和值初始化">
-<meta property="og:url" content="http://example.com/2016/11/14/cpp-init/index.html">
+<meta property="og:url" content="https://vbill.github.io/2016/11/14/cpp-init/index.html">
 <meta property="og:site_name" content="BillVYoung&#39;s Blog">
 <meta property="og:description" content="注：如果赶时间可以直接跳到下一小结阅读。 今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？ tm *t &#x3D; new tm;  t-&gt;tm_year &#x3D; 2016; t-&gt;tm_mon &#x3D; 5; t-&gt;tm_min &#x3D; 9; t-&gt;tm_hour &#x3D; 9; t-&gt;tm_sec &#x3D; 30; cout &lt;&lt;">
 <meta property="og:locale">
@@ -33,7 +33,7 @@
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2016/11/14/cpp-init/">
+<link rel="canonical" href="https://vbill.github.io/2016/11/14/cpp-init/">
 
 
 <script id="page-configurations">
@@ -189,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2016/11/14/cpp-init/">
+    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2016/11/14/cpp-init/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
