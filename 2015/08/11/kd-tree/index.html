@@ -27,11 +27,13 @@
 <meta property="og:site_name" content="BillVYoung&#39;s Blog">
 <meta property="og:description" content="使用KNN算法，需要找到样本点周围最近的N个点。最简单的方法是求出所有距离，然后找出前K大。然而点的数量巨大时，计算量会非常大。为了优化KNN算法，可以采用kd-tree（k维树）。它可以在各个维度的空间内对较大量的点进行检索。 kd树是二叉树，构造过程简单来说就是不断用垂直于坐标轴的超平面将k维空间切分，构成许多超矩形区域。每个节点都对应一个超平面，这个超平面过节点中存储的点并且将k维空间分成两">
 <meta property="og:locale">
+<meta property="og:image" content="https://vbill.github.io/img/kdtree/pic1.png">
 <meta property="article:published_time" content="2015-08-11T10:33:23.000Z">
-<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:modified_time" content="2020-10-18T11:29:46.056Z">
 <meta property="article:author" content="BillVYoung">
 <meta property="article:tag" content="数据结构与算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vbill.github.io/img/kdtree/pic1.png">
 
 <link rel="canonical" href="https://vbill.github.io/2015/08/11/kd-tree/">
 
@@ -191,7 +193,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+                <time title="Modified: 2020-10-18 19:29:46" itemprop="dateModified" datetime="2020-10-18T19:29:46+08:00">2020-10-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -351,7 +353,9 @@ int main()&#123;
 &#125;</code></pre>
 <p>过段时间会再尝试一下用python写一个kd树。了解到kd树也是从《统计学习方法》上看到的。但是sklearn库还提供了ball-tree。据说比kd树还好。sklearn上现成的算法确实很高效，要远远比自己写的算法快，而且还提供了不少额外功能。但我估计可能是它底层有C/C++优化的原因。</p>
 <p>网上搜OJ题解的时候看到所有的人都是开了四倍最大点数的定长数组写的，代码非常短。但其实根本没有必要（也许做比赛有必要吧，但我只求完成功能）。实际上，上面这份代码无论是消耗的内存空间还是执行时间都比开数组的方法小。</p>
-<p>[pic1](/img/kdtree/pic1.png " ")</p>
+<figure>
+<img src="/img/kdtree/pic1.png" alt="" /><figcaption>pic1</figcaption>
+</figure>
 
     </div>
 

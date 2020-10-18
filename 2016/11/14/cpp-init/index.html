@@ -27,11 +27,15 @@
 <meta property="og:site_name" content="BillVYoung&#39;s Blog">
 <meta property="og:description" content="注：如果赶时间可以直接跳到下一小结阅读。 今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？ tm *t &#x3D; new tm;  t-&gt;tm_year &#x3D; 2016; t-&gt;tm_mon &#x3D; 5; t-&gt;tm_min &#x3D; 9; t-&gt;tm_hour &#x3D; 9; t-&gt;tm_sec &#x3D; 30; cout &lt;&lt;">
 <meta property="og:locale">
+<meta property="og:image" content="https://vbill.github.io/img/cpp_init/pic_new1.png">
+<meta property="og:image" content="https://vbill.github.io/img/cpp_init/pic_new2.png">
+<meta property="og:image" content="https://vbill.github.io/img/cpp_init/pic_gcc_vs.png">
 <meta property="article:published_time" content="2016-11-14T15:19:00.000Z">
-<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:modified_time" content="2020-10-18T11:30:17.695Z">
 <meta property="article:author" content="BillVYoung">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vbill.github.io/img/cpp_init/pic_new1.png">
 
 <link rel="canonical" href="https://vbill.github.io/2016/11/14/cpp-init/">
 
@@ -191,7 +195,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+                <time title="Modified: 2020-10-18 19:30:17" itemprop="dateModified" datetime="2020-10-18T19:30:17+08:00">2020-10-18</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -232,8 +236,8 @@ cout &lt;&lt; mktime(t)&lt;&lt;endl;</code></pre>
 <p>之后他问了一个关键的问题：“如果不加括号是不是一定就不会去自动的调用相关的初始化部分？”</p>
 <p>我开始回答的是：如果是个类的话，会调用。基本类型不会。</p>
 <p>但是后来想想不太对，因为我印象中确实有的在函数里定义的临时类是没有经过初始化的。但当时在外边没有电脑。回去后在 Windows 环境下用 gcc(codeblocks) 和 VS2015 都试了一下，然后查了cppreference，大概明白是怎么回事了。</p>
-<p>首先经验证，new的时候加括号可以得到想要的结果： [pic1](/img/cpp_init/pic_new1.png " ") [pic2](/img/cpp_init/pic_new2.png " ")</p>
-<p>但是，直接在函数内部定义结构体变量，gcc和vs得到了不同的结果： [pic3](/img/cpp_init/pic_gcc_vs.png " ")</p>
+<p>首先经验证，new的时候加括号可以得到想要的结果： <img src="/img/cpp_init/pic_new1.png" alt="pic1" /> <img src="/img/cpp_init/pic_new2.png" alt="pic2" /></p>
+<p>但是，直接在函数内部定义结构体变量，gcc和vs得到了不同的结果： <img src="/img/cpp_init/pic_gcc_vs.png" alt="pic3" /></p>
 <p>这说明结构体内部的成员没有初始化。</p>
 <p>为了搞清所有的情况，查了下cppreference，并按照C++11的标准写了下面的内容：</p>
 <p>下面介绍C++对象两种重要的初始化方式：默认初始化和值初始化。主要参考cppreference写成的。并且删除了其中过时的部分（主要都是C++03的特性）。</p>

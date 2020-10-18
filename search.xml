@@ -116,10 +116,16 @@
     <url>/2014/05/17/Codeblocks-cpp11/</url>
     <content><![CDATA[<p>1.下载MINGW4.9。先从网站<a href="http://www.mingw.org/">http://www.mingw.org/</a>上下载在线安装器（页面右边有DOWNLOAD INSTALLER按钮）。</p>
 <p>2.我是WIN7的64位机子，选择下面这种配置：（如果不用POSIX而选WIN32反而用不了）</p>
-<p>[pic1](/img/codeblocks_cpp11/1.png " ")</p>
+<figure>
+<img src="/img/codeblocks_cpp11/1.png" alt="" /><figcaption>pic1</figcaption>
+</figure>
 <p>3.装好后配置CODEBLOCKS：</p>
-<p>[pic2](/img/codeblocks_cpp11/2.png " ")</p>
-<p>[pic3](/img/codeblocks_cpp11/3.png " ")</p>
+<figure>
+<img src="/img/codeblocks_cpp11/2.png" alt="" /><figcaption>pic2</figcaption>
+</figure>
+<figure>
+<img src="/img/codeblocks_cpp11/3.png" alt="" /><figcaption>pic3</figcaption>
+</figure>
 <p>4.写个程序运行一下：</p>
 <pre><code>    #include &lt;thread&gt;
     #include &lt;iostream&gt;
@@ -739,8 +745,8 @@ cout &lt;&lt; mktime(t)&lt;&lt;endl;</code></pre>
 <p>之后他问了一个关键的问题：“如果不加括号是不是一定就不会去自动的调用相关的初始化部分？”</p>
 <p>我开始回答的是：如果是个类的话，会调用。基本类型不会。</p>
 <p>但是后来想想不太对，因为我印象中确实有的在函数里定义的临时类是没有经过初始化的。但当时在外边没有电脑。回去后在 Windows 环境下用 gcc(codeblocks) 和 VS2015 都试了一下，然后查了cppreference，大概明白是怎么回事了。</p>
-<p>首先经验证，new的时候加括号可以得到想要的结果： [pic1](/img/cpp_init/pic_new1.png " ") [pic2](/img/cpp_init/pic_new2.png " ")</p>
-<p>但是，直接在函数内部定义结构体变量，gcc和vs得到了不同的结果： [pic3](/img/cpp_init/pic_gcc_vs.png " ")</p>
+<p>首先经验证，new的时候加括号可以得到想要的结果： <img src="/img/cpp_init/pic_new1.png" alt="pic1" /> <img src="/img/cpp_init/pic_new2.png" alt="pic2" /></p>
+<p>但是，直接在函数内部定义结构体变量，gcc和vs得到了不同的结果： <img src="/img/cpp_init/pic_gcc_vs.png" alt="pic3" /></p>
 <p>这说明结构体内部的成员没有初始化。</p>
 <p>为了搞清所有的情况，查了下cppreference，并按照C++11的标准写了下面的内容：</p>
 <p>下面介绍C++对象两种重要的初始化方式：默认初始化和值初始化。主要参考cppreference写成的。并且删除了其中过时的部分（主要都是C++03的特性）。</p>
@@ -1142,7 +1148,9 @@ int main()&#123;
         go_back=S[go_back];
     &#125;//逆序输出被击落导弹的高度
 &#125;</code></pre>
-<p>[pic1](/img/dp_longest_decreasing_sequence/1.png " ")</p>
+<figure>
+<img src="/img/dp_longest_decreasing_sequence/1.png" alt="" /><figcaption>pic1</figcaption>
+</figure>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
@@ -1444,7 +1452,9 @@ int main()&#123;
 &#125;</code></pre>
 <p>过段时间会再尝试一下用python写一个kd树。了解到kd树也是从《统计学习方法》上看到的。但是sklearn库还提供了ball-tree。据说比kd树还好。sklearn上现成的算法确实很高效，要远远比自己写的算法快，而且还提供了不少额外功能。但我估计可能是它底层有C/C++优化的原因。</p>
 <p>网上搜OJ题解的时候看到所有的人都是开了四倍最大点数的定长数组写的，代码非常短。但其实根本没有必要（也许做比赛有必要吧，但我只求完成功能）。实际上，上面这份代码无论是消耗的内存空间还是执行时间都比开数组的方法小。</p>
-<p>[pic1](/img/kdtree/pic1.png " ")</p>
+<figure>
+<img src="/img/kdtree/pic1.png" alt="" /><figcaption>pic1</figcaption>
+</figure>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
