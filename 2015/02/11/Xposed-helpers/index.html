@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="原文地址。主要讲解Xposed框架helper类里的各种方法。 Xposed中有许多Helper方法使得模块的开发变得更为简单。 # XposedBridge类 log log方法是一个向标准logcat和&#x2F;data&#x2F;xposed&#x2F;debug.log文件输出错误信息的简单方式。它可以捕获日志信息或者一个Throwable对象。后面的例子中，它将打印堆栈踪迹。 hookAllMethods &#x2F; ho">
+<meta property="og:type" content="article">
+<meta property="og:title" content="（译）Xposed Helpers">
+<meta property="og:url" content="http://example.com/2015/02/11/Xposed-helpers/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="原文地址。主要讲解Xposed框架helper类里的各种方法。 Xposed中有许多Helper方法使得模块的开发变得更为简单。 # XposedBridge类 log log方法是一个向标准logcat和&#x2F;data&#x2F;xposed&#x2F;debug.log文件输出错误信息的简单方式。它可以捕获日志信息或者一个Throwable对象。后面的例子中，它将打印堆栈踪迹。 hookAllMethods &#x2F; ho">
+<meta property="og:locale">
+<meta property="article:published_time" content="2015-02-11T12:18:08.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.970Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2015/02/11/Xposed-helpers/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>（译）Xposed Helpers | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2015/02/11/Xposed-helpers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          （译）Xposed Helpers
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-02-11 20:18:08" itemprop="dateCreated datePublished" datetime="2015-02-11T20:18:08+08:00">2015-02-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Helpers">原文地址</a>。主要讲解Xposed框架helper类里的各种方法。</p>
+<p>Xposed中有许多Helper方法使得模块的开发变得更为简单。</p>
+<h2 id="xposedbridge类"># XposedBridge类</h2>
+<h2 id="log">log</h2>
+<p><code>log</code>方法是一个向标准logcat和<code>/data/xposed/debug.log</code>文件输出错误信息的简单方式。它可以捕获日志信息或者一个<code>Throwable</code>对象。后面的例子中，它将打印堆栈踪迹。</p>
+<h2 id="hookallmethods-hookallconstructors">hookAllMethods / hookAllConstructors</h2>
+<p>如果你想把所有的方法都以一个指定的名称hook起来，或是hook类中所有的构造函数，你可以使用这两种方法。当有许多不同的变量，可是你希望在它们当中任何一个被调用之前/后都执行一段代码时，这是非常有用的。时刻记住，其它的ROM也许有额外的变量同样也被hook。尤其小心你在回调时得到的<code>args</code>。</p>
+<h2 id="xposedhelpers类"># XposedHelpers类</h2>
+<p>我建议把这个类添加到Eclipse的<strong>静态导入</strong>的偏好设置中：Window =&gt; Preferences =&gt; Java =&gt; Editor =&gt; Content Assist =&gt; Favorites =&gt; New Type，输入：de.robv.android.xposed.XposedHelpers。这样做的话，eclipse在你开始输入“get…”时会自动提示这个类中的方法，并且会创建这个方法的静态导入（这意味着在你的代码中是看不到类名的）。</p>
+<h2 id="findmethod-findconstructor-findfield">findMethod / findConstructor / findField</h2>
+<p>有许多你不必亲自使用反射获得方法、构造函数和字段的方式。同样，你也可以对几个特定参数种类使用“最佳匹配”来寻找方法和构造函数。比如：你可以用一个<code>TextView</code>类型的参数来调用<code>findMethodBestMatch(Class&lt;?&gt; clazz, String methodName, Object... args)</code>。如果没有更加符合匹配的变量，这同样会找到一个具有你指定的名称而且以View类型对象作为参数的方法。</p>
+<h2 id="callmethod-callstaticmethod-newinstance">callMethod / callStaticMethod / newInstance</h2>
+<p>利用上文提到的findXXX方法，这些方法使得调用方法和创建一个类的实例变得简单。调用者不必为此而使用反射。没有必要事先就取得某个方法，只要及时使用以上的这些方法调用它就可以了。参数类型是从实际的参数值和最匹配的被调用方法中自动拷贝而来。万一你想明确的指出参数的类型，创建一个<code>Class&lt;?&gt;</code>数组，然后把它传递给callXXX/newInstance。你可以使数组中的一些项为空（null）来使用实际参数的类型。但是数组的长度必须和参数的个数匹配。</p>
+<h2 id="getxxxfield-setxxxfield-getstaticxxxfield-setstaticxxxfield">getXXXField / setXXXField / getStaticXXXField /setStaticXXXField</h2>
+<p>它们是让你能够轻易获得和设置对象实例和类变量内容的封装器。你只需要对象的引用、字段名、和类型（当然还有提供给setter的新值）。如果你想获得/设置一个静态字段，并且没有对象的引用，你可以使用<code>getStaticXXX</code>和 <code>setStaticXXX</code>方法。然而当你有一个对象的引用时，区分静态和实例字段是没有必要的。<code>getXXX</code>和<code>setXXX</code>可以给两者都设定值。</p>
+<h2 id="getadditionalxxxfield-setadditionalxxxfield">getAdditionalXXXField / setAdditionalXXXField</h2>
+<p>这些方法让你将任何值与一个对象的实例或是整个类（像是一个静态字段）联系起来。这些值依照关键字-值对的方式存储。所以每个对象可以存储多个值。关键字可以是任何字符串，包括对象实际拥有的字段的名称。请注意你不能通过调用<code>getAdditionalInstanceField</code>获取你之前用<code>setAdditionalStaticField</code>存储的值。取而代之的是应该使用<code>getAdditionalStaticField</code>。它有一个变量来接受对象并自动查询它的类。</p>
+<h2 id="assetasbytearray">assetAsByteArray</h2>
+<p>这个方法以byte数组的形式返回资源。如果你想加载你模块的资源，你可以使用以下代码：</p>
+<pre><code>public class XposedTweakbox implements IXposedHookZygoteInit &#123;
+    @Override
+    public void initZygote(StartupParam startupParam) throws Throwable &#123;
+        Resources tweakboxRes = XModuleResources.createInstance(startupParam.modulePath, null);
+        byte[] crtPatch = assetAsByteArray(tweakboxRes, &quot;crtfix_samsung_d506192d5049a4042fb84c0265edfe42.bsdiff&quot;);
+...</code></pre>
+<h2 id="getmd5sum">getMD5Sum</h2>
+<p>返回文件系统中一个文件的MD5值。当前的app需要获取读这个文件的权限（在<code>init</code>方法中你拥有root权限，所以这应该不是什么问题）。</p>
+<h2 id="getprocesspid">getProcessPid</h2>
+<p>按照进程的/proc/[pid]/cmdline的第一部分来寻找这个进程，并以字符串形式返回它的PID。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/02/10/xposed-1/" rel="prev" title="（译）Xposed模块开发教程">
+      <i class="fa fa-chevron-left"></i> （译）Xposed模块开发教程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/02/12/Xposed-IntelliJ/" rel="next" title="IntelliJ下开发Xposed模块无法运行">
+      IntelliJ下开发Xposed模块无法运行 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#xposedbridge%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text"># XposedBridge类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#log"><span class="nav-number">2.</span> <span class="nav-text">log</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hookallmethods-hookallconstructors"><span class="nav-number">3.</span> <span class="nav-text">hookAllMethods &#x2F; hookAllConstructors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xposedhelpers%E7%B1%BB"><span class="nav-number">4.</span> <span class="nav-text"># XposedHelpers类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#findmethod-findconstructor-findfield"><span class="nav-number">5.</span> <span class="nav-text">findMethod &#x2F; findConstructor &#x2F; findField</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#callmethod-callstaticmethod-newinstance"><span class="nav-number">6.</span> <span class="nav-text">callMethod &#x2F; callStaticMethod &#x2F; newInstance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getxxxfield-setxxxfield-getstaticxxxfield-setstaticxxxfield"><span class="nav-number">7.</span> <span class="nav-text">getXXXField &#x2F; setXXXField &#x2F; getStaticXXXField &#x2F;setStaticXXXField</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getadditionalxxxfield-setadditionalxxxfield"><span class="nav-number">8.</span> <span class="nav-text">getAdditionalXXXField &#x2F; setAdditionalXXXField</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assetasbytearray"><span class="nav-number">9.</span> <span class="nav-text">assetAsByteArray</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getmd5sum"><span class="nav-number">10.</span> <span class="nav-text">getMD5Sum</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getprocesspid"><span class="nav-number">11.</span> <span class="nav-text">getProcessPid</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

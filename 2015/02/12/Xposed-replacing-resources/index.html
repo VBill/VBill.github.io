@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="这是Xposed在github上的最后一篇教程。原文地址 Xposed使得替换资源，比如：图像和字符串之类的事变得容易。下面是做法： # 简单的资源 @Override public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) throws Throwable &amp;#123;     XResources.setS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="（译）Xposed-替换资源">
+<meta property="og:url" content="http://example.com/2015/02/12/Xposed-replacing-resources/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="这是Xposed在github上的最后一篇教程。原文地址 Xposed使得替换资源，比如：图像和字符串之类的事变得容易。下面是做法： # 简单的资源 @Override public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) throws Throwable &amp;#123;     XResources.setS">
+<meta property="og:locale">
+<meta property="article:published_time" content="2015-02-12T12:18:08.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2015/02/12/Xposed-replacing-resources/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>（译）Xposed-替换资源 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2015/02/12/Xposed-replacing-resources/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          （译）Xposed-替换资源
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-02-12 20:18:08" itemprop="dateCreated datePublished" datetime="2015-02-12T20:18:08+08:00">2015-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这是Xposed在github上的最后一篇教程。<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Replacing-resources">原文地址</a></p>
+<p>Xposed使得替换资源，比如：图像和字符串之类的事变得容易。下面是做法：</p>
+<h2 id="简单的资源"># 简单的资源</h2>
+<pre><code>@Override
+public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) throws Throwable &#123;
+    XResources.setSystemWideReplacement(&quot;android&quot;, &quot;bool&quot;, &quot;config_unplugTurnsOnScreen&quot;, false);
+&#125;
+
+@Override
+public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
+    // replacements only for SystemUI
+    if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
+        return;
+
+    // different ways to specify the resources to be replaced
+    resparam.res.setReplacement(0x7f080083, &quot;YEAH!&quot;); // WLAN toggle text. You should not do this because the id is not fixed. Only for framework resources, you could use android.R.string.something
+    resparam.res.setReplacement(&quot;com.android.systemui:string/quickpanel_bluetooth_text&quot;, &quot;WOO!&quot;);
+    resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;string&quot;, &quot;quickpanel_gps_text&quot;, &quot;HOO!&quot;);
+    resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;integer&quot;, &quot;config_maxLevelOfSignalStrengthIndicator&quot;, 6);
+&#125;</code></pre>
+<p>这就是“简单”的替换，通过这种方式你可以直接替换值。这种方式可以用于：Boolean, Color, Integer, int[], String and String[]。</p>
+<p>如你所见，有几种不同的设置替换资源的方式。对于构成安卓框架一部分的所有地方都应该被替换的资源（对所有的app都可用），你应在<code>initZygote</code>中调用<code>XResources.setSystemWideReplacement(...)</code>方法。对于特定app的资源，你需要核实过你确实在正确的app之后在<code>hookInitPackageResources</code>中调用<code>res.setReplacement</code>。这时你不应使用<code>setSystemWideReplacement</code>因为可能会产生你无法预料的副作用。</p>
+<p>替换Drawable也采用相似的办法。然而你不能只使用Drawable作为替换物，因为这可能导致同一个Drawable实例被不同的ImageViews引用。因此，你需要使用包装器：</p>
+<pre><code>resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;status_bar_background&quot;, new XResources.DrawableLoader() &#123;
+    @Override
+    public Drawable newDrawable(XResources res, int id) throws Throwable &#123;
+        return new ColorDrawable(Color.WHITE);
+    &#125;
+&#125;);</code></pre>
+<h2 id="复杂资源"># 复杂资源</h2>
+<p>更加复杂的资源（比如动画类型的Drawable）必须从你的模块资源当中被引用。我们假设你想要替换电池图标。下面是代码：</p>
+<pre><code>package de.robv.android.xposed.mods.coloredcirclebattery;
+
+import android.content.res.XModuleResources;
+import de.robv.android.xposed.IXposedHookInitPackageResources;
+import de.robv.android.xposed.IXposedHookZygoteInit;
+import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
+
+public class ColoredCircleBattery implements IXposedHookZygoteInit, IXposedHookInitPackageResources &#123;
+    private static String MODULE_PATH = null;
+
+    @Override
+    public void initZygote(StartupParam startupParam) throws Throwable &#123;
+        MODULE_PATH = startupParam.modulePath;
+    &#125;
+
+    @Override
+    public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
+        if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
+            return;
+
+        XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, resparam.res);
+        resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;stat_sys_battery&quot;, modRes.fwd(R.drawable.battery_icon));
+        resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;stat_sys_battery_charge&quot;, modRes.fwd(R.drawable.battery_icon_charge));
+    &#125;
+&#125;</code></pre>
+<blockquote>
+<p>你可以随意命名你的替换资源。我选择 batterry_icon 替代 stat_sys_battery 让它们在本文中更好区分。</p>
+</blockquote>
+<p>之后把 “battery_icon” 和 “battery_icon_charge” 这两个Drawable添加到你的模块当中。最简单的情况是添加 “res/drawables/battery_icon.png” 和 “res/drawables/battery_icon_charge.png”。但是你可以使用Android提供的所有方式来定义资源。所以对于动画图标，你可使用带有<code>animation-list</code>和其它Drawable资源引用的XML文件。当然这个XML文件也必须放在你的模块内。</p>
+<p>通过这些替换，你能要求Xposed将所有指向特定资源的请求跳到你自己的模块。这同样意味着你可以利用<a target="_blank" rel="noopener" href="http://developer.android.com/guide/topics/resources/providing-resources.html#AlternativeResources">qualifier</a>，比如：如果你对landscape或更低的屏幕密度需要不同的资源。翻译也可以以相同的方式提供。同样，你也许需要这么做如果原来的资源使用qualifier。你不能仅仅替换一段文字的西班牙语版本。正如前面提到的，请求是向前的，所以它会完全被你的模块资源处理，并且不会察觉其它翻译的存在。</p>
+<p>这个技巧基本上对所有资源类型都有效。除了极个别的像主题之类的。</p>
+<h2 id="修改布局"># 修改布局</h2>
+<p>尽管理论上你可以用之前提到的技巧彻底替换布局，但这有很多坏处。你必须从原有布局中复制整个布局，这会降低对其它ROM的兼容性。主题也许回丢失。只有一个模块可以代替布局。如果两个模块都尝试这么做，后者将会胜出。最重要的是，其它资源的ID和引用是很难定义的。因此，我不推荐这样做。</p>
+<p>作为一种好的选择，你可以使用后填充的hook。下面是你怎么做：</p>
+<pre><code>@Override
+public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
+    if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
+        return;
+
+    resparam.res.hookLayout(&quot;com.android.systemui&quot;, &quot;layout&quot;, &quot;status_bar&quot;, new XC_LayoutInflated() &#123;
+        @Override
+        public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable &#123;
+            TextView clock = (TextView) liparam.view.findViewById(
+                    liparam.res.getIdentifier(&quot;clock&quot;, &quot;id&quot;, &quot;com.android.systemui&quot;));
+            clock.setTextColor(Color.RED);
+        &#125;
+    &#125;); 
+&#125;</code></pre>
+<p>每当“status_bar”布局被填充时，回调方法<code>handleLayoutInflated</code>就被调用。在你以参数形式得到的LayoutInflatedParam对象中，你可以找到刚被创建的View并在需要时修改它。你同样会得到<code>resNames</code>用来鉴别这个方法因哪个布局而被调用（万一你对多个布局使用同一种方法），还有<code>variant</code>，比如可能包含<code>layout-land</code>，如果它就是被加载的布局的版本的话。<code>res</code>帮助你以布局从同一个来源得到ID或额外的资源。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/02/12/Xposed-IntelliJ/" rel="prev" title="IntelliJ下开发Xposed模块无法运行">
+      <i class="fa fa-chevron-left"></i> IntelliJ下开发Xposed模块无法运行
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/02/13/xposed-appsettings/" rel="next" title="Xposed AppSettings权限管理原理分析">
+      Xposed AppSettings权限管理原理分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E8%B5%84%E6%BA%90"><span class="nav-number">1.</span> <span class="nav-text"># 简单的资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E8%B5%84%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text"># 复杂资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%B8%83%E5%B1%80"><span class="nav-number">3.</span> <span class="nav-text"># 修改布局</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

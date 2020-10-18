@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="两个问题，代表线段树中最基础的两类：1.更新数组里某个值然后查询。2.统一更新数组中一段区间的值然后查询。放假回来这两天也就看到了这里：） 为什么要学习线段树（个人之见）：1.如果有上万甚至更多的数据反复查找并更新，用这个数据结构就比较高效了。2.高级的数据结构和算法多学些没坏处，尤其大一大二需要注重基础。3.想考这个证书的话需要学：） 第一类问题:  成电OJ 838 母仪天下   富庶的建业城">
+<meta property="og:type" content="article">
+<meta property="og:title" content="两个线段树的基础问题">
+<meta property="og:url" content="http://example.com/2014/07/14/two-segtree-basic-problems/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="两个问题，代表线段树中最基础的两类：1.更新数组里某个值然后查询。2.统一更新数组中一段区间的值然后查询。放假回来这两天也就看到了这里：） 为什么要学习线段树（个人之见）：1.如果有上万甚至更多的数据反复查找并更新，用这个数据结构就比较高效了。2.高级的数据结构和算法多学些没坏处，尤其大一大二需要注重基础。3.想考这个证书的话需要学：） 第一类问题:  成电OJ 838 母仪天下   富庶的建业城">
+<meta property="og:locale">
+<meta property="article:published_time" content="2014-07-14T15:19:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2014/07/14/two-segtree-basic-problems/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>两个线段树的基础问题 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2014/07/14/two-segtree-basic-problems/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          两个线段树的基础问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-07-14 23:19:00" itemprop="dateCreated datePublished" datetime="2014-07-14T23:19:00+08:00">2014-07-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>两个问题，代表线段树中最基础的两类：1.更新数组里某个值然后查询。2.统一更新数组中一段区间的值然后查询。放假回来这两天也就看到了这里：）</p>
+<p>为什么要学习线段树（个人之见）：1.如果有上万甚至更多的数据反复查找并更新，用这个数据结构就比较高效了。2.高级的数据结构和算法多学些没坏处，尤其大一大二需要注重基础。3.想考这个<a target="_blank" rel="noopener" href="http://cspro.ccf.org.cn/lead/info.do?__action=info_view&amp;catalog=notice&amp;id=hsyfsb9v-8yx&amp;__forward=true">证书</a>的话需要学：）</p>
+<p>第一类问题:</p>
+<blockquote>
+<p>成电OJ 838 母仪天下</p>
+</blockquote>
+<blockquote>
+<p>富庶的建业城中，有一条格格不入的长街，名曰跳蚤街，被战争所致的孤儿，聚集于此。全国的经济都在为战争服务之时，也无人顾得了这里了。</p>
+</blockquote>
+<blockquote>
+<p>除了两位夫人。</p>
+</blockquote>
+<blockquote>
+<p>大乔小乔每天都会带着一些食物来到跳蚤街，分给某一位孩子。为了避免分配不均，她们时常会询问一个区域内食物的总量，然后进行调整以保证每个孩子都有足够的食物。</p>
+</blockquote>
+<blockquote>
+<p>Input</p>
+</blockquote>
+<blockquote>
+<p>第一行两个整数n，m，表示跳蚤街住着n户孩子，大乔小乔一共分发或询问了m次。</p>
+</blockquote>
+<blockquote>
+<p>第二行n个整数，第i个数ai表示第i户孩子已有ai的食物。</p>
+</blockquote>
+<blockquote>
+<p>接下来m行，每行开始先读入一个整数si，指明这是一次询问还是一次分发。</p>
+</blockquote>
+<blockquote>
+<p>si=0，表明这是一次询问，然后读入两个整数li,ri，表示询问[li，ri]区间中的孩子们一共有多少食物。</p>
+</blockquote>
+<blockquote>
+<p>si=1，表明这是一次分发，然后读入两个整数xi,wi，表示对第xi户孩子分发了wi的食物。</p>
+</blockquote>
+<blockquote>
+<p>1≤n,m≤100000,0≤ai≤100000,1≤xi≤n,0≤wi≤10000,1≤li≤ri≤n</p>
+</blockquote>
+<blockquote>
+<p>Output</p>
+</blockquote>
+<blockquote>
+<p>有多少询问就输出多少行，每行输出一个整数，作为对该询问的回答。</p>
+</blockquote>
+<blockquote>
+<p>Sample Input</p>
+</blockquote>
+<blockquote>
+<p>5 4</p>
+</blockquote>
+<blockquote>
+<p>1 2 3 4 5</p>
+</blockquote>
+<blockquote>
+<p>1 2 3</p>
+</blockquote>
+<blockquote>
+<p>0 2 4</p>
+</blockquote>
+<blockquote>
+<p>1 4 1</p>
+</blockquote>
+<blockquote>
+<p>0 1 5</p>
+</blockquote>
+<blockquote>
+<p>Sample Output</p>
+</blockquote>
+<blockquote>
+<p>12</p>
+</blockquote>
+<blockquote>
+<p>19</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+using namespace std;
+
+typedef struct&#123;
+    int l,r;
+    int sum;
+&#125;SegTree;
+
+int n,m,i,j,s;
+
+void Build(SegTree trees[], int id, int l, int r)&#123;
+    trees[id].l=l; trees[id].r=r;
+    if (l==r)&#123;
+        trees[id].sum=0;
+    &#125;else&#123;
+        int mid=(l+r)/2;
+        Build(trees, 1+id*2, l, mid);
+        Build(trees, id*2+2, mid+1, r);
+        trees[id].sum=trees[id*2+2].sum+trees[id*2+1].sum;
+    &#125;
+&#125;
+
+void Update(SegTree trees[], int id, int pos, int val)&#123;
+    if (trees[id].l==trees[id].r)&#123;
+        trees[id].sum=val;
+    &#125;else&#123;
+        int mid=(trees[id].l+trees[id].r)/2;
+        if (pos&lt;=mid) Update(trees, id*2+1, pos, val);
+        else Update(trees, id*2+2, pos, val);
+        trees[id].sum=trees[id*2+2].sum+trees[id*2+1].sum;
+    &#125;
+&#125;
+
+int Query(SegTree trees[], int id, int l, int r)&#123;
+    if (trees[id].l==l &amp;&amp; trees[id].r==r)
+        return trees[id].sum;
+    else&#123;
+        int mid=(trees[id].l+trees[id].r)/2;
+        if(r&lt;=mid) return Query(trees, id*2+1, l, r);
+        else if(l&gt;mid) return Query(trees, id*2+2, l, r);
+        else return Query(trees, id*2+1, l, mid)+Query(trees, id*2+2, mid+1, r);
+    &#125;
+&#125;
+
+int main()&#123;
+    scanf(&quot;%d%d&quot;, &amp;n, &amp;m);
+    int a[n];
+    SegTree *tree=new SegTree[4*n];
+    Build(tree, 0, 0, n-1);
+    for(i=0; i&lt;n; i++)&#123;
+        scanf(&quot;%d&quot;, &amp;a[i]);
+        Update(tree, 0, i, a[i]);
+    &#125;
+    for(i=0; i&lt;m; i++)&#123;
+        int q, ll_x, rr_w;
+        scanf(&quot;%d%d%d&quot;, &amp;s, &amp;ll_x, &amp;rr_w);
+        if(s==0)&#123;
+            q=Query(tree, 0, ll_x-1, rr_w-1);
+            printf(&quot;%d\n&quot;, q);
+        &#125;else&#123;
+            q=Query(tree, 0, ll_x-1, ll_x-1);
+            Update(tree, 0, ll_x-1, rr_w+q );
+        &#125;
+    &#125;
+    return 0;
+&#125;</code></pre>
+<p>我的数组下标是从0开始的。所以线段树的写法可能看上去和网上一些模板和伪代码不太一样。</p>
+<p>第二类问题：</p>
+<blockquote>
+<p>成电OJ 839 东风不与周郎便</p>
+</blockquote>
+<blockquote>
+<p>“揽二乔于东南兮，乐朝夕之与共”</p>
+</blockquote>
+<blockquote>
+<p>一首铜雀台赋，将愤怒与恐惧散播在了孙吴大军之中。</p>
+</blockquote>
+<blockquote>
+<p>对抗曹军，万事俱备，只欠东风。</p>
+</blockquote>
+<blockquote>
+<p>现在已经找到n个风眼，这些风眼的东风有强有弱，诸葛亮说他每次祈风都能够将一段风眼的东风增强，但需人去帮他布阵。同时他需要时刻掌控风眼的状况，以确定下一步的计划，所以还需要知道一段风眼的强度之和。</p>
+</blockquote>
+<blockquote>
+<p>借东风，此乃逆天之术，施术者会折阳寿不说，布阵者更是会受十倍之伤。</p>
+</blockquote>
+<blockquote>
+<p>“何人能当此任？”</p>
+</blockquote>
+<blockquote>
+<p>“在下愿往，大都督。”</p>
+</blockquote>
+<blockquote>
+<p>“你是？”</p>
+</blockquote>
+<blockquote>
+<p>“在下一无名小卒，来自跳蚤街。”</p>
+</blockquote>
+<blockquote>
+<p>Input</p>
+</blockquote>
+<blockquote>
+<p>第一行两个整数n，m，表示有n个风眼，诸葛亮一共祈风或询问了m次。</p>
+</blockquote>
+<blockquote>
+<p>第二行n个整数，第i个数ai表示第i个风眼已有东风的强度。</p>
+</blockquote>
+<blockquote>
+<p>接下来m行，每行开始先读入一个整数si，指明这是一次询问还是一次祈风。</p>
+</blockquote>
+<blockquote>
+<p>si=0，表明这是一次询问，然后读入两个整数li,ri，表示询问[li，ri]区间中风眼的东风强度之和。</p>
+</blockquote>
+<blockquote>
+<p>si=1，表明这是一次祈风，然后读入三个整数li,ri,wi，表示把[li，ri]区间中每个风眼的东风强度提升wi。</p>
+</blockquote>
+<blockquote>
+<p>1≤n,m≤100000,0≤ai≤10000,0≤wi≤10000,1≤li≤ri≤n</p>
+</blockquote>
+<blockquote>
+<p>Output 有多少询问就输出多少行，每行输出一个整数，作为对该询问的回答。</p>
+</blockquote>
+<blockquote>
+<p>Sample Input</p>
+</blockquote>
+<blockquote>
+<p>5 4</p>
+</blockquote>
+<blockquote>
+<p>1 2 3 4 5</p>
+</blockquote>
+<blockquote>
+<p>1 2 3 2</p>
+</blockquote>
+<blockquote>
+<p>0 3 4</p>
+</blockquote>
+<blockquote>
+<p>1 4 5 3</p>
+</blockquote>
+<blockquote>
+<p>0 2 4</p>
+</blockquote>
+<blockquote>
+<p>Sample Output</p>
+</blockquote>
+<blockquote>
+<p>9</p>
+</blockquote>
+<blockquote>
+<p>16</p>
+</blockquote>
+<p>手头没有一本书是讲线段树区间更新的，翻了无数博客，文档，而且网上所有资料里下标都是1开始的（很不习惯），终于写出了一个体现了C++面向对象风格的程序（其实就是把数据和操作封装了个对象-_-||）。</p>
+<p>区间更新时并不是每个节点都更新，需要加一个标记，把要更新的数据放在标记里。等到需要修改子节点（比如更新或查询）的时候把这个标签里的信息传下去。如果你的查询或修改区间刚好和你二分处的区间相同，这个查询或修改操作就不再向下一层执行，而是直接返回结果。</p>
+<pre><code>#include&lt;cstdio&gt;
+#include&lt;cstring&gt;
+#define __int64 long long
+#define MAX 100005
+class Node&#123;
+public:
+    int l,r;
+    __int64 sum,add;
+&#125;;
+int num[MAX];
+
+class SegTree&#123;
+private:
+    Node *tree;
+    void PushDown(int id)&#123;
+        int j=id*2+1;
+        int mid=(tree[id].l+tree[id].r)/2;
+        tree[j].add+=tree[id].add;
+        tree[j+1].add+=tree[id].add;
+        tree[j].sum+=tree[id].add*(mid-tree[id].l+1);
+        tree[j+1].sum+=tree[id].add*(tree[id].r-mid);
+        tree[id].add=0;
+    &#125;
+public:
+    SegTree(int n)&#123;tree=new Node[4*n];&#125;
+    ~SegTree()&#123;delete []tree;&#125;
+
+    void Build(int l,int r,int id)&#123;
+        tree[id].l=l; tree[id].r=r; tree[id].add=0;
+        if(l==r)tree[id].sum=num[l];
+        else&#123;
+            int mid=(l+r)/2;
+            Build(l,mid,id*2+1);
+            Build(mid+1,r,id*2+2);
+            tree[id].sum=tree[id*2+2].sum+tree[id*2+1].sum;
+        &#125;
+    &#125;;
+
+    void Update(int l,int r,int c,int id)&#123;
+        if (tree[id].l&gt;=l&amp;&amp;tree[id].r&lt;=r)&#123;
+            tree[id].sum+=(__int64)c*(tree[id].r-tree[id].l+1);
+            tree[id].add+=c;
+        &#125;else&#123;
+            if (tree[id].add) PushDown(id);
+            int mid=(tree[id].l+tree[id].r)/2;
+            int j=id*2+1;
+            if (l&lt;=mid) Update(l,r,c,j);
+            if (r&gt;mid) Update(l,r,c,j+1);
+            tree[id].sum=tree[j].sum+tree[j+1].sum;
+        &#125;
+    &#125;;
+
+    __int64 Query(int l,int r,int id)&#123;
+        if (tree[id].l&gt;=l &amp;&amp; tree[id].r&lt;=r)
+            return tree[id].sum;
+        else&#123;
+            if(tree[id].add) PushDown(id);
+            int mid,j;
+            __int64 ans=0;
+            mid=(tree[id].l+tree[id].r)/2;
+            j=id*2+1;
+            if(l&lt;=mid) ans+=Query(l,r,j);
+            if(r&gt;mid) ans+=Query(l,r,j+1);
+            return ans;
+        &#125;
+    &#125;
+&#125;;
+
+int main()&#123;
+    int n,m,a,b,c;
+    int cmd;
+    scanf(&quot;%d%d&quot;,&amp;n,&amp;m);
+    for (int i=0;i&lt;n;i++) scanf(&quot;%d&quot;,num+i);
+
+    SegTree tt(n);
+
+    tt.Build(0,n-1,0);
+    while(m--)&#123;
+        scanf(&quot;%d%d%d&quot;,&amp;cmd,&amp;a,&amp;b);
+        if (cmd==1) scanf(&quot;%d&quot;,&amp;c);
+        if (cmd==0)
+            printf(&quot;%lld\n&quot;, tt.Query(a-1, b-1, 0));
+        else
+            tt.Update(a-1, b-1, c, 0);
+    &#125;
+    return 0;
+&#125;</code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/07/14/mfset-optimize-cdoj203/" rel="prev" title="一个并查集问题的优化（CDOJ203）">
+      <i class="fa fa-chevron-left"></i> 一个并查集问题的优化（CDOJ203）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/07/15/linux-shellscript-wireless-card-compile/" rel="next" title="利用Linux Shellscript 安装网卡驱动">
+      利用Linux Shellscript 安装网卡驱动 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

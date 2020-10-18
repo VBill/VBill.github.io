@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="昨天C++课上留了三道题，除了C语言本身外都涉及了一些算法。其中第二个问题是这样的： 拦截导弹 某国为了防御敌国的导弹袭击，开发出一种导弹拦截系统。但是这种导弹拦截系统有一个缺陷：虽然它的第一发炮弹能够到达任意的高度，但是以后每一发炮弹都不能高于前一发的高度。某天，雷达捕捉到敌国的导弹来袭，并观测到导弹依次飞来的高度，请计算这套系统最多能拦截多少导弹。拦截来袭导弹时，必须按来袭导弹袭击的时间顺序，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划--寻找最长递减子序列">
+<meta property="og:url" content="http://example.com/2014/05/31/dp-longest-decreasing-sequence/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="昨天C++课上留了三道题，除了C语言本身外都涉及了一些算法。其中第二个问题是这样的： 拦截导弹 某国为了防御敌国的导弹袭击，开发出一种导弹拦截系统。但是这种导弹拦截系统有一个缺陷：虽然它的第一发炮弹能够到达任意的高度，但是以后每一发炮弹都不能高于前一发的高度。某天，雷达捕捉到敌国的导弹来袭，并观测到导弹依次飞来的高度，请计算这套系统最多能拦截多少导弹。拦截来袭导弹时，必须按来袭导弹袭击的时间顺序，">
+<meta property="og:locale">
+<meta property="article:published_time" content="2014-05-31T05:52:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.970Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2014/05/31/dp-longest-decreasing-sequence/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>动态规划--寻找最长递减子序列 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2014/05/31/dp-longest-decreasing-sequence/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动态规划--寻找最长递减子序列
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-05-31 13:52:00" itemprop="dateCreated datePublished" datetime="2014-05-31T13:52:00+08:00">2014-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>昨天C++课上留了三道题，除了C语言本身外都涉及了一些算法。其中第二个问题是这样的：</p>
+<p>拦截导弹</p>
+<p>某国为了防御敌国的导弹袭击，开发出一种导弹拦截系统。但是这种导弹拦截系统有一个缺陷：虽然它的第一发炮弹能够到达任意的高度，但是以后每一发炮弹都不能高于前一发的高度。某天，雷达捕捉到敌国的导弹来袭，并观测到导弹依次飞来的高度，请计算这套系统最多能拦截多少导弹。拦截来袭导弹时，必须按来袭导弹袭击的时间顺序，不允许先拦截后面的导弹，再拦截前面的导弹。</p>
+<p>输入</p>
+<p>第一行，输入雷达捕捉到的敌国导弹的数量k（k&lt;=25），</p>
+<p>第二行，输入k个正整数，表示k枚导弹的高度，按来袭导弹的袭击时间顺序给出，以空格分隔。</p>
+<p>输出</p>
+<p>输出只有一行，包含一个整数，表示最多能拦截多少枚导弹。</p>
+<p>样例输入</p>
+<p>8</p>
+<p>300 207 155 300 299 170 158 65</p>
+<p>样例输出</p>
+<p>6</p>
+<p>课堂上没搞出来。老师说用到了动态规划。好吧，高中没学过信息学竞赛。不过没关系，回去翻了翻《算法导论》，基本算弄明白了。其实就是求一串数的最长递减子序列。</p>
+<p>问题关键在于，可能的情况组合很多，不适合穷举。所以要利用动态规划（很适合这类问题）。动态规划把问题分成很多子问题，而子问题之间又有关系。子问题不是相互独立的，子问题可能有重叠，全局最优解由子问题的最优解构成（最优子结构性质）。这和分治法（典型的比如归并排序）不一样。</p>
+<p>动态规划的基本想法在于：</p>
+<ol type="1">
+<li>描述最优解结构，就是说最优解是什么样子的，符合什么条件。</li>
+<li>递归定义最优解的值。也就是写出状态方程。其中一般需要特别考虑初始条件。</li>
+<li>自底向上计算最优解的值。</li>
+<li>由计算的值构造最优解（在这题里没要求，到第三部求出序列长就行了）。</li>
+</ol>
+<p>其中，问题设计时最关心的就是第二步。以下的步骤是必不可少的：</p>
+<ul>
+<li>阶段划分。</li>
+<li>确定状态变量。当前状态变量是由之前阶段的某个状态转移来的。当前状态是对之前所有状态的完整总结。当前这个状态之后的选择<strong>只受</strong>当前最优决策序列的影响（无后效性）。</li>
+<li>写状态转移方程。也就是确定如何从之前状态得到本阶段的状态。</li>
+<li>找边界条件（开始和终止的条件）。</li>
+</ul>
+<p>比如说，这个问题中要拦第i个导弹。截止到第i个导弹的最长拦截序列肯定包含了前面i-1个导弹中最长的序列。如果不是这样，我们求出的截止到第i个导弹的拦截序列就不是最长的了。我们用数组D[i]把截止到第i个导弹的最长拦截序列长度存起来。最后计算完i=k（导弹总数）时，整个问题的答案就是数组D[i]的最大值。</p>
+<p>如果用一个数组，把前一个最优解对应的导弹编号存下来，最后还可以把被击落的导弹高度按编号输出。</p>
+<p>代码：</p>
+<pre><code>/*
+    设数组A存放导弹高度，D[i]是高度为A[i]是的最优解，S用于记录最优解中导弹被击落的次序
+    最优解结构：设在第k个数处的最优解为D(k)。设当前位于第i个数，则在第i个数处的
+            最优解D(i)为：在i之前拦下导弹最多的方法的解D(j)加上1。（因为把第i
+            个也打下来了，所以加上1）。当然还要保证A[i]&lt;=A[j]
+    递归解：D(i)=D(j)+1。j是数组A中位于A[i]左侧，且大于等于A[i]的所有数中D值最大的
+            那个。如果A[i]左侧没有找到大于等于它的数，则D[i]=1。
+    状态转移方程：D(i)=max&#123;D(j)+1&#125;  (0&lt;=j&lt;i&lt;k)
+                D(0)=1
+    最终结果：找到数组D中最大的数，这个数就是结果。
+*/
+#include &lt;cstdio&gt;
+int main()&#123;
+    int k;
+    scanf(&quot;%d&quot;, &amp;k);
+    int A[k], D[k], S[k];
+
+    for(int i=0; i&lt;k; i++)&#123;
+        scanf(&quot;%d&quot;, &amp;A[i]);
+        D[i]=0;
+    &#125;
+    D[0]=1;
+
+    for(int i=1; i&lt;k; i++)&#123;
+        bool found=false;   //是否找到i之前的最优解
+        int last_good_solve=D[0];
+        int good_position=0;//最优解的下标和值
+        for(int j=0; j&lt;i; j++)
+            if(A[j]&gt;=A[i] &amp;&amp; D[j]&gt;=D[good_position])&#123;
+                last_good_solve=D[j];
+                good_position=j;
+                found=true;
+            &#125;
+
+        if(found)&#123;
+            D[i]=1+D[good_position];
+            S[i]=good_position;
+        &#125;
+        else &#123;
+            D[i]=1;
+            S[i]=good_position;
+        &#125;
+    &#125;
+
+    int result=0;   int go_back;//用于向前找被击落的导弹
+    for(int i=0; i&lt;k; i++)&#123;
+        if(D[i]&gt;result)&#123;
+            result=D[i];
+            go_back=i;
+        &#125;
+    &#125;
+
+    printf(&quot;%d\n&quot;, result);
+
+    for(int i=0; i&lt;result; i++)&#123;
+        printf(&quot;%d  &quot;, A[go_back]);
+        go_back=S[go_back];
+    &#125;//逆序输出被击落导弹的高度
+&#125;</code></pre>
+<p>[pic1](/img/dp_longest_decreasing_sequence/1.png " ")</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/05/18/a-qsort-program/" rel="prev" title="一个快速排序程序">
+      <i class="fa fa-chevron-left"></i> 一个快速排序程序
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/07/14/mfset-optimize-cdoj203/" rel="next" title="一个并查集问题的优化（CDOJ203）">
+      一个并查集问题的优化（CDOJ203） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

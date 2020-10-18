@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="使用KNN算法，需要找到样本点周围最近的N个点。最简单的方法是求出所有距离，然后找出前K大。然而点的数量巨大时，计算量会非常大。为了优化KNN算法，可以采用kd-tree（k维树）。它可以在各个维度的空间内对较大量的点进行检索。 kd树是二叉树，构造过程简单来说就是不断用垂直于坐标轴的超平面将k维空间切分，构成许多超矩形区域。每个节点都对应一个超平面，这个超平面过节点中存储的点并且将k维空间分成两">
+<meta property="og:type" content="article">
+<meta property="og:title" content="KD-Tree">
+<meta property="og:url" content="http://example.com/2015/08/11/kd-tree/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="使用KNN算法，需要找到样本点周围最近的N个点。最简单的方法是求出所有距离，然后找出前K大。然而点的数量巨大时，计算量会非常大。为了优化KNN算法，可以采用kd-tree（k维树）。它可以在各个维度的空间内对较大量的点进行检索。 kd树是二叉树，构造过程简单来说就是不断用垂直于坐标轴的超平面将k维空间切分，构成许多超矩形区域。每个节点都对应一个超平面，这个超平面过节点中存储的点并且将k维空间分成两">
+<meta property="og:locale">
+<meta property="article:published_time" content="2015-08-11T10:33:23.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2015/08/11/kd-tree/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>KD-Tree | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2015/08/11/kd-tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          KD-Tree
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-08-11 18:33:23" itemprop="dateCreated datePublished" datetime="2015-08-11T18:33:23+08:00">2015-08-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>使用KNN算法，需要找到样本点周围最近的N个点。最简单的方法是求出所有距离，然后找出前K大。然而点的数量巨大时，计算量会非常大。为了优化KNN算法，可以采用kd-tree（k维树）。它可以在各个维度的空间内对较大量的点进行检索。</p>
+<p>kd树是二叉树，构造过程简单来说就是不断用垂直于坐标轴的超平面将k维空间切分，构成许多超矩形区域。每个节点都对应一个超平面，这个超平面过节点中存储的点并且将k维空间分成两部分。</p>
+<p>平衡kd树的构建是递归的，每次选择一个区间内的中位数大（后面解释）的点为根节点，然后中位数点左侧和右侧区间递归这个构建过程。直到区间大小为一。</p>
+<p>中位数大的点就是指如果按照一定规则给点排序，排序后下标是中位数的那个点（中间的那个点）。构建kd树时给某区间点的排序规则是：位于第x层的节点比较第(x%k+1)维坐标的大小。比如：如果是构建整个树的根节点，则所有点都参与排序，比较的是它们的第一维的大小。位于中间的点就是根节点。</p>
+<p>查询前n近的算法简单来说就是：用一个大小位n的大顶堆保存前n近的点。先从根节点出发找到给定点所在空间对应的kd树的叶子节点，并且在找这个点的时候把路途经过的点加入堆里。如果堆满了，而且新经过的点离待查询点更近一些，那就把堆顶的点去掉，并添加进这个点（注意新的点不一定还在堆顶）。这时候，堆中所有点都包含在以给定点为圆（球）心，以给定点到堆顶点为半径的圆（球）内。之后从叶子节点一层层返回，每到一层的一个父节点，就看另一个叶子节点所在的区域是不是与这个圆相交。如果相交说明这一侧可能有更近的点，那么就进入这一侧搜寻更近的点。</p>
+<p>查询过程也可以用递归实现。判断与圆（球）相交的方法：圆（球）心到超平面的距离小于半径。</p>
+<p>在网上看到的资料大多没有简单的代码，而且缺少注释。许多代码是复制一个开源C++库的，作为学习来说源代码的结构有点复杂，不太适合学习。<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/K-d_tree">维基上</a>有更详细的解释和许多有用的学习资料连接，而且有python版的实现。</p>
+<p>为了自己实现一个简单的kd树练练手，我从网上搜了一道<a target="_blank" rel="noopener" href="http://acm.hdu.edu.cn/showproblem.php?pid=4347">杭电OJ上的题</a>。对于KNN算法来说很实用的题目，要求就是给一些点，找离目标点前M近的点。只涉及树的建立和查询。</p>
+<p>这道OJ题的代码：</p>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+using namespace std;
+
+#define MAX_DIM 5
+#define DIS(X) ((X)*(X))
+
+int n_dim;    //当前所比较的维度，分割面分割的维度
+
+struct Point&#123;
+    int coord[MAX_DIM]; //坐标
+    Point *lft, *rgt;   //树的左右节点指针
+
+    Point(int k)&#123;
+        lft=rgt=NULL;
+        for(int i=0; i&lt;k; i++)
+            scanf(&quot;%d&quot;, &amp;coord[i]);
+    &#125;
+
+    Point()&#123;
+        lft=rgt=NULL;
+    &#125;
+
+    inline bool operator&lt;(const Point &amp;b)const&#123;
+        return coord[n_dim]&lt;b.coord[n_dim];
+    &#125;
+&#125;;
+
+struct kdTree&#123;
+    vector&lt;Point&gt; allp; //全体点
+    priority_queue&lt;pair&lt;double, Point*&gt; &gt; *resultq; //查到的点
+    int dim;    //空间的维度
+    Point *root;    //树根指针
+
+    kdTree(int n, int k)&#123;
+        resultq=NULL;
+        root=NULL;
+        dim=k;
+        for(int i=0; i&lt;n; i++)&#123;
+            allp.push_back(Point(k));
+        &#125;
+        build(0, allp.size()-1, 0, root);
+    &#125;
+
+    void query(int m, Point &amp;p)&#123;
+        Point res[20];
+        resultq=new priority_queue&lt;pair&lt;double, Point*&gt; &gt;;
+        queryInner(p, m, 0, root);
+        //给出查询结果
+        printf(&quot;the closest %d points are:\n&quot;, m);
+        for(int n=0; !resultq-&gt;empty(); n++)&#123;
+            res[n]=*(resultq-&gt;top().second);
+            resultq-&gt;pop();
+        &#125;
+        for(int n=m-1; n&gt;=0;n--)&#123;
+            for(int i=0; i&lt;dim; i++)
+                printf(&quot;%d%c&quot;, res[n].coord[i], i==dim-1?&#39;\n&#39;:&#39; &#39;);
+        &#125;
+        delete resultq;
+        resultq=NULL;
+    &#125;
+
+    void build(int l, int r, int dep, Point* &amp;rt)&#123;
+        if(l&gt;r)return;
+        int mid=(l+r)&gt;&gt;1;
+        n_dim=dep%dim;  //存储分割面分割的是那个维度
+        nth_element(allp.begin()+l, allp.begin()+mid, allp.begin()+r+1);
+
+        rt=&amp;allp[mid];  //把空间的点接到树上
+        build(l, mid-1, dep+1, rt-&gt;lft);
+        build(mid+1, r, dep+1, rt-&gt;rgt);
+    &#125;
+
+    void queryInner(Point &amp;p, int m, int dep, Point *rt)&#123;
+        if(rt==NULL)return;
+        pair&lt;double, Point*&gt; tmp=make_pair(0.0, rt); //计算到被查点的距离，准备构建结果队列
+        for(int i=0; i&lt;dim; i++)
+            tmp.first+=DIS(rt-&gt;coord[i]-p.coord[i]);
+
+        int now_dim=dep%dim;
+        bool flg=false;
+        Point *go=rt-&gt;lft, *go_another=rt-&gt;rgt;
+
+        if(p.coord[now_dim]&gt;=rt-&gt;coord[now_dim])
+            swap(go, go_another);   //go代表被查点所在的一侧
+        if(go)
+            queryInner(p, m, dep+1, go);
+        if((int)resultq-&gt;size()&lt;m)&#123;
+            resultq-&gt;push(tmp);
+            flg=true;
+            //查到的结果不够，一定向另一侧递归
+        &#125;else&#123;
+            if(tmp.first&lt;resultq-&gt;top().first)&#123;
+                resultq-&gt;pop();
+                resultq-&gt;push(tmp);
+            &#125;//发现了更近的点
+            /*待查询点与最远点形成的超球
+                与分割空间的超平面相交，向不是所在的一侧递归
+            */
+            if(DIS(p.coord[now_dim] - rt-&gt;coord[now_dim]) &lt; resultq-&gt;top().first)
+                flg=true;
+        &#125;
+        if(go_another &amp;&amp; flg)
+            queryInner(p, m, dep+1, go_another);
+    &#125;
+    
+&#125;;
+
+
+int main()&#123;
+    //freopen(&quot;1.txt&quot;, &quot;r&quot; ,stdin);
+    int n, k;
+    while(scanf(&quot;%d%d&quot;, &amp;n, &amp;k)!=EOF)&#123;
+        kdTree *tree = new kdTree(n, k);
+        int t;
+        scanf(&quot;%d&quot;, &amp;t);
+        while(t--)&#123;
+            Point tmp=Point(k);
+            int m;
+            scanf(&quot;%d&quot;, &amp;m);
+            tree-&gt;query(m, tmp);
+        &#125;
+        delete tree;
+    &#125;
+    return 0;
+&#125;</code></pre>
+<p>过段时间会再尝试一下用python写一个kd树。了解到kd树也是从《统计学习方法》上看到的。但是sklearn库还提供了ball-tree。据说比kd树还好。sklearn上现成的算法确实很高效，要远远比自己写的算法快，而且还提供了不少额外功能。但我估计可能是它底层有C/C++优化的原因。</p>
+<p>网上搜OJ题解的时候看到所有的人都是开了四倍最大点数的定长数组写的，代码非常短。但其实根本没有必要（也许做比赛有必要吧，但我只求完成功能）。实际上，上面这份代码无论是消耗的内存空间还是执行时间都比开数组的方法小。</p>
+<p>[pic1](/img/kdtree/pic1.png " ")</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/08/04/KNN-digit-recognizer/" rel="prev" title="Numpy多进程的 KNN 手写识别器">
+      <i class="fa fa-chevron-left"></i> Numpy多进程的 KNN 手写识别器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/09/09/C-andJava/" rel="next" title="Java对于C++的差异对比">
+      Java对于C++的差异对比 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

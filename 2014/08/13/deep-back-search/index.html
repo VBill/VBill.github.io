@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近在看回溯搜索算法，觉得值得总结一下。 回溯法简单说就是，为了搜到合适的解做出尝试，尝试失败时就退回到之前状态，然后尝试其他的可能性。这类算法套路比较固定。总的思想我概括为：搜到就输出，搜不到就返回，符合条件就搜。 流程用文字描述，大概分为两类情况： 1.当搜索过程每前进一步，会遇到多种情况时：这类情况的代码形式上类似图的深度遍历 void search(int k)&amp;#123;     if">
+<meta property="og:type" content="article">
+<meta property="og:title" content="回溯法搜索总结">
+<meta property="og:url" content="http://example.com/2014/08/13/deep-back-search/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="最近在看回溯搜索算法，觉得值得总结一下。 回溯法简单说就是，为了搜到合适的解做出尝试，尝试失败时就退回到之前状态，然后尝试其他的可能性。这类算法套路比较固定。总的思想我概括为：搜到就输出，搜不到就返回，符合条件就搜。 流程用文字描述，大概分为两类情况： 1.当搜索过程每前进一步，会遇到多种情况时：这类情况的代码形式上类似图的深度遍历 void search(int k)&amp;#123;     if">
+<meta property="og:locale">
+<meta property="article:published_time" content="2014-08-13T13:59:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.970Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2014/08/13/deep-back-search/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>回溯法搜索总结 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2014/08/13/deep-back-search/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          回溯法搜索总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-08-13 21:59:00" itemprop="dateCreated datePublished" datetime="2014-08-13T21:59:00+08:00">2014-08-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在看回溯搜索算法，觉得值得总结一下。</p>
+<p>回溯法简单说就是，为了搜到合适的解做出尝试，尝试失败时就退回到之前状态，然后尝试其他的可能性。这类算法套路比较固定。总的思想我概括为：搜到就输出，搜不到就返回，符合条件就搜。</p>
+<p>流程用文字描述，大概分为两类情况：</p>
+<p>1.当搜索过程每前进一步，会遇到多种情况时：这类情况的代码形式上类似图的深度遍历</p>
+<pre><code>void search(int k)&#123;
+    if (达到目标) 输出解
+    else
+       for each(所有可能情况)
+       if (满足递归条件)&#123;
+         保存状态
+         search(k+1)
+         恢复之前的状态
+       &#125;
+&#125;</code></pre>
+<p>2.当搜索过程每前进一步，只有两种选择时：这类情况的代码形式上类似二叉树的先根遍历</p>
+<pre><code>void search(int k)&#123;
+   if (达到目标) 输出解
+   else&#123;
+      if(符合选择1条件)&#123;
+        保存状态和数据
+        search(k+1, 参数1）
+        恢复
+      &#125;
+      if(符合选择2条件)&#123;
+        保存状态和数据
+        search(k+1, 参数2）
+        恢复
+      &#125;
+   &#125;        
+&#125;</code></pre>
+<p>当然不一定所有问题都严格遵守上面的步骤。比如，有的时候搜索的分支可能并没改变数据（之后有举例），这时保存数据这步是可以没有的。</p>
+<p>回溯法的优点在于省内存，搜索过程中产生解空间。由于采用了递归和深度优先的策略，最大耗费空间仅仅和搜索的最大深度有关。</p>
+<p>第一个例子，给出n和m，从1到n中挑出m个数，产生所有可能的排列数和组合数，n小于10：</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+bool used[10]=&#123;false&#125;;//数字i是否使用过
+int num[10];//n,m smaller than 10
+
+int id1=0, id2=0;
+
+vector&lt;int&gt; num2;
+bool used2[10]=&#123;false&#125;;
+
+void p(int n, int r, int k)&#123;
+    if(k==0)&#123;
+        id1++;
+        cout&lt;&lt;id1&lt;&lt;&quot;: &quot;;
+        for(int i=r; i&gt;=1; i--)cout&lt;&lt;num[i];
+        cout&lt;&lt;&quot;\t&quot;;
+    &#125;else&#123;
+        for(int i=1; i&lt;=n; i++)&#123;
+            if(!used[i])&#123;
+                num[k]=i;
+                used[i]=true;
+                p(n,r,k-1);
+                used[i]=false;
+            &#125;
+        &#125;
+    &#125;
+&#125;
+
+void permutation(int n, int r)&#123;
+    p(n,r,r);
+&#125;
+
+void c(int n, int r, int k)&#123;
+    if((int)num2.size()==r)&#123;
+        id2++;
+        cout&lt;&lt;id2&lt;&lt;&quot;: &quot;;
+        for(int i=0; i&lt;num2.size(); i++)cout&lt;&lt;num2[i];
+        cout&lt;&lt;&quot;\t&quot;;
+    &#125;else&#123;
+        for(int i=k; i&lt;=n; i++)&#123;//i=k,保证排列结果是由小到大输出
+            if(!used2[i])&#123;
+                num2.push_back(i);
+                used2[i]=true;//save
+                c(n,r,i+1);//search
+                used2[i]=false;
+                num2.pop_back();//go back
+
+            &#125;
+        &#125;
+    &#125;
+&#125;
+
+void combination(int n, int r)&#123;
+    c(n,r,1);
+&#125;
+
+int main()&#123;
+    int n,m;
+    cin&gt;&gt;n&gt;&gt;m;
+    cout&lt;&lt;&quot;permutation:&quot;&lt;&lt;endl;
+    permutation(n,m);
+    cout&lt;&lt;endl;
+    cout&lt;&lt;&quot;combination&quot;&lt;&lt;endl;
+    combination(n,m);
+    return 0;
+&#125;</code></pre>
+<p>当然上面的例子是输出所有的排列和组合。大部分时候我们只是搜索特定的一个结果，或某些结果。因此舍弃不必要的解是很重要的。这就涉及限界，或者说剪枝。如果搜索到某一步时再接着搜肯定没有结果，那么就停止在这个分支的搜索，通常用一个限制条件或外加判断函数来判断。</p>
+<p>第二个例子，给定一个集合，知道它有n个元素，希望从n个数中取出若干个使得它们的和为c。第一行输入n和c，第二行输入集合内的数。把可行的数字组合（1组就行）输出，如果没有符合条件的组合，就输出NO SOLUTION。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+int n,c;
+int a[9000];
+int r=0, mi[9000],s[9000], l[9000];
+//s=sum, mi=min, l=answer list
+void work(int x, int z)&#123;
+    if(z==c)&#123;
+        for(int i=1; i&lt;=r; i++)&#123;
+            cout&lt;&lt;l[i]&lt;&lt;&quot; &quot;;
+            if(i==r) cout&lt;&lt;endl;
+        &#125;
+        exit(0);
+    &#125;else&#123;
+    //限制条件，如果当前的和加上剩下所有的数超过目标值，且当前的和加上剩下最小的
+    也不超过目标值则继续搜索
+        if( x&lt;=n &amp;&amp; z+mi[x]&lt;=c &amp;&amp; z+s[x]&gt;=c)&#123;
+            if(z+a[x]&lt;=c)&#123;//do1, add a[x], when a[x] can be added
+                r++;
+                l[r]=a[x];//save
+
+                work(x+1,z+a[x]);//do1
+
+                r--;//back
+            &#125;
+            work(x+1,z);//do2, not to add a[x]
+        &#125;
+    &#125;
+&#125;
+/* 
+    x增加时有两个选择，将下一个数挑出，或者不挑出，所以有do1和do2两个选择
+*/
+
+int main()&#123;
+    scanf(&quot;%d%d&quot;, &amp;n, &amp;c);
+    for(int i=1; i&lt;=n; i++)
+        scanf(&quot;%d&quot;, &amp;a[i]);
+
+    mi[n]=s[n]=a[n];
+    for(int i=n-1; i&gt;=1; i--)&#123;
+        if(a[i]&lt;mi[i+1]) mi[i]=a[i];
+        else mi[i]=mi[i+1];
+        s[i]=s[i+1]+a[i];
+    &#125;
+    work(1,0);
+
+    cout&lt;&lt;&quot;No solution!&quot;&lt;&lt;endl;
+    return 0;
+&#125;</code></pre>
+<p>有的时候在递归过程中一些结果可能会被重复搜索（即：走了不同的路线，但是到达了相同目的地 -_-|| ），我们还可以建立一个表储存搜索过的结果，如果发现搜过这个结果了，就不要继续递归，直接从表里读取，这样能避免大量的重复递归。这个实现起来相对容易，就不再举例了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/08/07/install-centos7/" rel="prev" title="CentOS 7 安装常见问题汇总">
+      <i class="fa fa-chevron-left"></i> CentOS 7 安装常见问题汇总
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/10/05/git-commands/" rel="next" title="git基础常用指令汇总">
+      git基础常用指令汇总 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

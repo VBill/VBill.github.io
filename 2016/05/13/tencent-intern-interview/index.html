@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="之前因为学校考试时间原因拒绝了阿里巴巴的实习机会。几天后腾讯那边通知笔试过了，要去面试。腾讯的面试经历也是相当宝贵的经历，因为是第一次参加现场的面试，所以记录一下（4月底面的，问的问题可能不止这些，时间久记不住所有问题）。 一面 一面面试问了一些基础问题，因为投的是后台开发，问了很多网络方面的问题，但是都十分基础。比如：HTTP协议是TCP还是UDP之上的？讲一下HTTPS协议。对Linux套接字">
+<meta property="og:type" content="article">
+<meta property="og:title" content="腾讯实习面试经历总结和记录">
+<meta property="og:url" content="http://example.com/2016/05/13/tencent-intern-interview/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="之前因为学校考试时间原因拒绝了阿里巴巴的实习机会。几天后腾讯那边通知笔试过了，要去面试。腾讯的面试经历也是相当宝贵的经历，因为是第一次参加现场的面试，所以记录一下（4月底面的，问的问题可能不止这些，时间久记不住所有问题）。 一面 一面面试问了一些基础问题，因为投的是后台开发，问了很多网络方面的问题，但是都十分基础。比如：HTTP协议是TCP还是UDP之上的？讲一下HTTPS协议。对Linux套接字">
+<meta property="og:locale">
+<meta property="article:published_time" content="2016-05-13T09:03:53.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="感想">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2016/05/13/tencent-intern-interview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>腾讯实习面试经历总结和记录 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/05/13/tencent-intern-interview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          腾讯实习面试经历总结和记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-13 17:03:53" itemprop="dateCreated datePublished" datetime="2016-05-13T17:03:53+08:00">2016-05-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%84%9F%E6%83%B3/" itemprop="url" rel="index"><span itemprop="name">感想</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>之前因为学校考试时间原因拒绝了阿里巴巴的实习机会。几天后腾讯那边通知笔试过了，要去面试。腾讯的面试经历也是相当宝贵的经历，因为是第一次参加现场的面试，所以记录一下（4月底面的，问的问题可能不止这些，时间久记不住所有问题）。</p>
+<h1 id="一面">一面</h1>
+<p>一面面试问了一些基础问题，因为投的是后台开发，问了很多网络方面的问题，但是都十分基础。比如：HTTP协议是TCP还是UDP之上的？讲一下HTTPS协议。对Linux套接字编程了解如何，发送和读取数据有哪些方法（我不知道什么意思，答的是那几个API:read/write, send/recv, sento/recvfrom，然后扯了一下udp的发送和接受）。阻塞和非阻塞通信的区别（中间有个概念搞错了，设置超时也是属于阻塞的）？还有套接字怎么关闭的（四次挥手），为什么有等待时延，套接字关闭后还能收数据么（没答出来）？算法问题比较简单：从两个链表中找出重复数字。我一开始用哈希表，就着优化哈希表扯了半天，后经提醒换用位图法，用01位标记数字是否出现。不过答题前我问面试官数字范围，他说int范围。我觉得这样用位图的话空间开销很大，如果链表不长还是哈希好点，但是我猜这是正确答案吧，所以没用开始没用位图的理由我就没说。最后问C和C++，static关键字的作用（忘了答在C++类里的作用了），static变量在内存的布局。没问项目经历和参加的比赛。一面问了二十多分钟。</p>
+<p>可能是早上六点多就从学校赶到市区面试的原因，平时睡眠时间本来就不是很多，一早起脑袋有点晕。好多会的问题没回答好。。。答题前一定要想好再说，要点要说全。。。</p>
+<h1 id="二面">二面</h1>
+<p>二面还是没怎么问项目。。。问了比赛：介绍数学建模是什么比赛，你负责干什么？我就介绍了一下，然后讲了下15年国赛题（作了个死，说这个比赛和计算机关系不大。。。），我说我负责编程辅助写作，LaTex比较熟。然后问最近在干什么，我说学校让组队做个大课设，我和另外两个同学写一套ftp服务器和客户端，我负责整个项目。之后就是让深入介绍服务器的架构，以及你们怎么学习、了解、实现ftp协议的。我大概讲了一下我们怎么用ftp和FileZilla与vsftpd通信看报文，怎么看RFC文档。我们写的服务器是如何用单进程和select实现并发。大概讲了select在我们的服务器里怎么用的。中途被问知道epoll不？我说知道，但是面试官没继续问，让我接着讲服务器。又问为什么不用多线程，我说另外两个同学不熟悉pthread（糊涂了，应该讲讲单进程并发的好处）。。。然后就是问整个服务器性能怎么优化，第一反应什么都没想到。。。经提醒后回答了可以根据文件大小情况预读一部分文件到内存里，这样就不会因为fread的buffer太小反复读硬盘（服务器五一节的时候写好了，没加这个功能，传了个上G的文件，感觉可能有必要加这个功能）。中间扯优化的时候不知道怎么说起加锁上了，于是说了pthread_mutex的用法，又说了pthread_rwlock。最后问了算法，问1亿条短信中怎么找重复出现频率最高的100条短信（也就是这100条其实内容一样）。面试官挺好的，说这个问题可以多想想，没有标准答案，想你觉得最好的方法。最后我说的是数据随机分到多台机器上，每台机器找用hash找100个重复率最高的数据，然后直接把统计结果汇总一下，在一台机器上加起来，汇总后出现最多的100个就是答案了。面试完了想想貌似不对，如果某条前100的短信被比较“平均”地分发到所有机器上，那么可能它不会进入这些机器的前100。。。所以应该就直接每个返回这个机器上所有的统计结果，最后汇总。虽然麻烦，但不会错。最后一个问题是如何存储和查询一个短信是否存在于这1亿条短信中。开始直接说的哈希，然后觉得太low了。。。又说了如果短信内容有由多片段重复组成的，可以采用类似字典树的方法，还能省些空间，然后画了一下示意图。现在想想直接哈希肯定不行的，因为数据量太大（后来知道了一个东西叫Hash Tree，感觉用来解决这个问题或许可行）。二面大概半小时。</p>
+<p>感觉就是最后的开放性问题回答不太好。平时这类问题没看过，学校课程和项目中也不出现这类问题，是个短板。问最近干什么居然说的做学校课设也是low爆了，应该说在学些什么技术之类的。。。不过这也是实话是说吧，这学期专业必修课开太多了，光是作业和实验就挺忙了，加上找实习，确实就没学新东西。</p>
+<h1 id="hr面">HR面</h1>
+<p>HR面主要就是问问爱好，家在哪里，有女朋友么，聊点学校学习的事情，喜欢哪个城市。可能因为以前在高考人口大省上学，又聊了学校和为什么学计算机。HR居然还问了简历上的比赛经历，这个我很意外。HR挺友好，知道我们学校在郊区，进来面试时候给了我一瓶宾馆的矿泉水。</p>
+<p>HR面没什么感觉。。。不知道刷人的标准是什么，我猜测是主要依据是前两面表现，另外看性格和交流能力吧。</p>
+<p>最后过了一周，在五一前通知面试过了，分配到了TEG做后台开发。也总算是告一段落了。运气不错的是我认识的另外两个人也过了面试。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%84%9F%E6%83%B3/" rel="tag"># 感想</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/12/alibaba-intern-tst/" rel="prev" title="阿里巴巴内推实习面试经历总结和记录">
+      <i class="fa fa-chevron-left"></i> 阿里巴巴内推实习面试经历总结和记录
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/07/09/design-patterns/" rel="next" title="设计模式学习总结1">
+      设计模式学习总结1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E9%9D%A2"><span class="nav-number">1.</span> <span class="nav-text">一面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E9%9D%A2"><span class="nav-number">2.</span> <span class="nav-text">二面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hr%E9%9D%A2"><span class="nav-number">3.</span> <span class="nav-text">HR面</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

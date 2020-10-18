@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="注：如果赶时间可以直接跳到下一小结阅读。 今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？ tm *t &#x3D; new tm;  t-&gt;tm_year &#x3D; 2016; t-&gt;tm_mon &#x3D; 5; t-&gt;tm_min &#x3D; 9; t-&gt;tm_hour &#x3D; 9; t-&gt;tm_sec &#x3D; 30; cout &lt;&lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++对象的默认初始化和值初始化">
+<meta property="og:url" content="http://example.com/2016/11/14/cpp-init/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="注：如果赶时间可以直接跳到下一小结阅读。 今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？ tm *t &#x3D; new tm;  t-&gt;tm_year &#x3D; 2016; t-&gt;tm_mon &#x3D; 5; t-&gt;tm_min &#x3D; 9; t-&gt;tm_hour &#x3D; 9; t-&gt;tm_sec &#x3D; 30; cout &lt;&lt;">
+<meta property="og:locale">
+<meta property="article:published_time" content="2016-11-14T15:19:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2016/11/14/cpp-init/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>C++对象的默认初始化和值初始化 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2016/11/14/cpp-init/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++对象的默认初始化和值初始化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-11-14 23:19:00" itemprop="dateCreated datePublished" datetime="2016-11-14T23:19:00+08:00">2016-11-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>注：如果赶时间可以直接跳到下一小结阅读。</p>
+<p>今天一个朋友问我一个问题，由此引发了我对C++对象初始化方式的深入研究。他问我这段代码有什么问题没有？</p>
+<pre><code>tm *t = new tm;
+
+t-&gt;tm_year = 2016;
+t-&gt;tm_mon = 5;
+t-&gt;tm_min = 9;
+t-&gt;tm_hour = 9;
+t-&gt;tm_sec = 30;
+cout &lt;&lt; mktime(t)&lt;&lt;endl;</code></pre>
+<p>我第一反应是time_t格式不能直接cout，直接cout得不到格式化的时间。当然这个不是重点，他告诉我每次结果都是随机的！我这才反应过来是new的问题。因为new在堆上分配的空间是没有初始化的。</p>
+<p>然后我打算告诉他在main函数外的全局部分定义一个变量，但是在我消息发送出去前，他又告诉我他把代码的第一行修改成了下面这个形式，然后就初始化成固定值了：</p>
+<pre><code>tm t1;</code></pre>
+<p>他问我是不是这样做就总是固定值呢？我认为这个对象是栈上的，印象里这个是没有初始化的。所以回答只是编译器的问题。然后我提供了一个使用指针的的方法：</p>
+<pre><code>tm *t = new tm();</code></pre>
+<p>之后他问了一个关键的问题：“如果不加括号是不是一定就不会去自动的调用相关的初始化部分？”</p>
+<p>我开始回答的是：如果是个类的话，会调用。基本类型不会。</p>
+<p>但是后来想想不太对，因为我印象中确实有的在函数里定义的临时类是没有经过初始化的。但当时在外边没有电脑。回去后在 Windows 环境下用 gcc(codeblocks) 和 VS2015 都试了一下，然后查了cppreference，大概明白是怎么回事了。</p>
+<p>首先经验证，new的时候加括号可以得到想要的结果： [pic1](/img/cpp_init/pic_new1.png " ") [pic2](/img/cpp_init/pic_new2.png " ")</p>
+<p>但是，直接在函数内部定义结构体变量，gcc和vs得到了不同的结果： [pic3](/img/cpp_init/pic_gcc_vs.png " ")</p>
+<p>这说明结构体内部的成员没有初始化。</p>
+<p>为了搞清所有的情况，查了下cppreference，并按照C++11的标准写了下面的内容：</p>
+<p>下面介绍C++对象两种重要的初始化方式：默认初始化和值初始化。主要参考cppreference写成的。并且删除了其中过时的部分（主要都是C++03的特性）。</p>
+<h1 id="默认初始化">默认初始化</h1>
+<p>默认初始化的语法：</p>
+<pre><code>T object;
+new T;</code></pre>
+<p>在以下情形，会使用默认初始化：</p>
+<ol type="1">
+<li>当变量具有自动，静态，线程生存周期，并且没有初始化时。</li>
+<li>使用<code>new</code>动态分配的对象没有初始化</li>
+<li>在一个类中，当某个基类或者非静态成员在构造函数初始化列表中没有出现，并且该构造函数被调用的时候。</li>
+</ol>
+<p>默认初始化的效果：</p>
+<ul>
+<li>如果T是一个非<a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/concept/PODType">POD</a> (Plain Old Data)类型，就会在列表为空的构造函数，以及重载的构造函数中选择一个（注：可能有构造函数参数列表非空且所有的参数都有默认值）。被选中的这个构造函数会初始化变量。</li>
+<li>如果T是数组类型，每个元素都被默认初始化。</li>
+<li>否则，什么也不做：自动生存周期的对象（包括他们的子对象）值都是未定义的。</li>
+</ul>
+<p>#值初始化</p>
+<p>值初始化的语法：</p>
+<pre><code>T();    (1) 
+new T ();   (2) 
+Class::Class(...) : member() &#123; ... &#125;    (3) 
+T object &#123;&#125;;    (4) (since C++11)
+T&#123;&#125;;    (5) (since C++11)
+new T &#123;&#125;;   (6) (since C++11)
+Class::Class(...) : member&#123;&#125; &#123; ... &#125;    (7) (since C++11)</code></pre>
+<p>在以下情形使用值初始化：</p>
+<ul>
+<li>1,5) 当使用内部为空的圆括号或花括号创建一个无名的临时对象时。</li>
+<li>2,6) 当用<code>new</code>创建一个动态对象，且后面使用了内部为空的圆括号或花括号时。</li>
+<li>3,7) 在某个类中，当某个非静态成员或基类使用了空的花括号或圆括号初始化时。</li>
+</ul>
+<p>初始化的效果：</p>
+<ol type="1">
+<li>如果类型T是有至少1个用户定义的构造函数，那么调用默认构造函数。</li>
+<li>如果T没有默认构造函数，或者有用户定义的构造函数，或者默认构造函数是删除的，那么使用默认初始化。</li>
+<li>如果T不是Union且无用户的构造函数，那么所有的非静态成员和基类采用值初始化。</li>
+<li>如果T是个有默认构造函数的类，且这个构造函数不是用户定义的也不是删除的，那么该对象被<a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/zero_initialization">零初始化</a>。然后，如果它有一个non-trivial的默认构造函数，它将被默认初始化。</li>
+<li>如果T是数组，每个元素都被值初始化。</li>
+<li>否则都执行<a target="_blank" rel="noopener" href="http://en.cppreference.com/w/cpp/language/zero_initialization">零初始化</a></li>
+</ol>
+<p>关于第3条很难理解。首先，trivial的定义参考这个<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/3899223/what-is-a-non-trivial-constructor-in-c">链接</a>。明确了这个定义，看看下面的代码：</p>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+#include &lt;type_traits&gt;
+
+using namespace std;
+
+class A&#123;//non-trivial
+    int a;
+    int b;
+    char c;
+public:
+    A()&#123;
+        cout &lt;&lt; &quot;it works!&quot;&lt;&lt;endl;
+    &#125;;
+&#125;;
+
+class B&#123;//trivial
+    int a;
+    int b;
+    char c;
+&#125;;
+
+int main()
+&#123;
+
+    A *a = new A();
+    B *b = new B();
+
+    cout&lt;&lt;is_pod&lt;A&gt;::value&lt;&lt;endl;
+
+    return 0;
+&#125;</code></pre>
+<p>运行结果表明a指向的对象的成员是随机的，并且输出了"it works"，而b指向的成员的对象全部是0。</p>
+<p>A的构造函数尽管是空的，但是它是用户定义的，因此是non-trivial，进行默认初始化。参考默认初始化条的效果，由于A不是POD类型，那么就会执行A的默认构造函数（我们定义的那个）。由于我们定义的构造函数没有初始化任何数据成员，因此A成员的值是随机的，并且输出了信息"it works"。</p>
+<p>B的构造函数有编译器合成，是trivial的，它符合第三条，执行零初始化。</p>
+<h1 id="总结">总结</h1>
+<p>根据以上内容，我总结了2点帮助记忆：</p>
+<h2 id="第一点">第一点</h2>
+<p>第一点是关于两种初始化发生的条件的：</p>
+<p>只要使用了括号（圆括号或花括号），就是值初始化。可以简单理解为括号提醒编译器你想要用某个值赋给对象。</p>
+<p>没有使用括号，就是默认初始化。可以简单理解成，你不加任何东西，编译器就会使用默认的行为。</p>
+<h2 id="第二点">第二点</h2>
+<p>第二点是关于两种初始化的效果的：</p>
+<p>默认初始化：总是试图使用默认构造函数初始化对象。但是它对于POD类型则不这么做。比如：C基本类型，聚合类型，POD类型的数组。C语言的struct以及基本类型如果不初始化也是随机的值，和这个POD类型在C++类似。我们可以简单理解为：总使用默认构造函数，同时兼容C。</p>
+<p>值初始化：我们观察几个条件可以发现，大部分情况下（效果2里包含默认构造器被删除的情况），只要用户指定了默认构造函数，那么就执行默认初始化。并且，如果编译器合成了构造函数，执行零初始化。另外，对于数组和其它情况是值初始化。而且排除掉数组后，基本类型的值初始化都是零初始化。综上，可以简单理解为：有用户定义构造函数，就执行用户定义的构造函数，否则都使用零初始化。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C++</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/09/30/backhome/" rel="prev" title="暑假实习回来">
+      <i class="fa fa-chevron-left"></i> 暑假实习回来
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/09/new-blog2020/" rel="next" title="想写出高质量的博客">
+      想写出高质量的博客 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">默认初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%82%B9"><span class="nav-number">2.1.</span> <span class="nav-text">第一点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">第二点</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

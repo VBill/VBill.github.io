@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="原文地址。这是开发者所写的，可以说是官方开发指南。文章讲述了Xposed的原理，以及怎么开发Xposed框架的模块。头一次翻译技术文档，有错误的话请多包涵。 好了，你想学习怎么为Xposed开发新的模块么？那么读读这篇教程（或者我们可以称他为”泛读短文”）学着怎么去做。这不仅包括“创建这个文件然后插入…”这类的技巧，也包括这些技巧背后的思想。这些思想正是创造价值的步骤以及你真正需要了解你做了什么和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="（译）Xposed模块开发教程">
+<meta property="og:url" content="http://example.com/2015/02/10/xposed-1/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="原文地址。这是开发者所写的，可以说是官方开发指南。文章讲述了Xposed的原理，以及怎么开发Xposed框架的模块。头一次翻译技术文档，有错误的话请多包涵。 好了，你想学习怎么为Xposed开发新的模块么？那么读读这篇教程（或者我们可以称他为”泛读短文”）学着怎么去做。这不仅包括“创建这个文件然后插入…”这类的技巧，也包括这些技巧背后的思想。这些思想正是创造价值的步骤以及你真正需要了解你做了什么和">
+<meta property="og:locale">
+<meta property="article:published_time" content="2015-02-10T12:18:08.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2015/02/10/xposed-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>（译）Xposed模块开发教程 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2015/02/10/xposed-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          （译）Xposed模块开发教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-02-10 20:18:08" itemprop="dateCreated datePublished" datetime="2015-02-10T20:18:08+08:00">2015-02-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Development-tutorial">原文地址</a>。这是开发者所写的，可以说是官方开发指南。文章讲述了Xposed的原理，以及怎么开发Xposed框架的模块。头一次翻译技术文档，有错误的话请多包涵。</p>
+<p>好了，你想学习怎么为Xposed开发新的模块么？那么读读这篇教程（或者我们可以称他为”泛读短文”）学着怎么去做。这不仅包括“创建这个文件然后插入…”这类的技巧，也包括这些技巧背后的思想。这些思想正是创造价值的步骤以及你真正需要了解你做了什么和为什么这么做的原因。如果你觉得本文“太长，不想读”，那么你可以只看最后的源代码和阅读“<a href="#使工程成为Xposed模块">使工程成为Xposed模块</a>“部分。但是如果你读了整篇文章你就会有更好的理解。你之后会节省出来阅读这个的时间，因为你不必凭自己弄清楚每件事。</p>
+<h2 id="修改主题"># 修改主题</h2>
+<p>你将重新创建在<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedExamples/tree/master/RedClock">github</a>上可以找到的红色钟表的的例子。它包括将状态栏的钟表变为红色并且加入一个笑脸的功能。我选择这个例子是因为它非常小，而且容易看见所做的修改。并且，它也使用了框架所提供的一些基本方法。</p>
+<h2 id="xposed如何工作"># Xposed如何工作</h2>
+<p>在你开始做出自己的修改之前，你应当大致了解Xposed如何工作（如果觉得这部分无聊可以跳过）。以下就是原理：</p>
+<p>有一个叫做”Zygote”的进程，它是android运行环境的核心。每个应用都从一份它的拷贝(“fork”)产生。这个进程在手机启动时由一个叫 /init.rc 的脚本启动。这个进程的启动在 /system/bin/app_process 加载所需要的类和调用初始化方法后完成。</p>
+<p>这里就是Xposed发挥用处的地方了。当你安装完框架后，<a target="_blank" rel="noopener" href="https://github.com/rovo89/Xposed">一个扩展过的app_process</a>就会被复制到 /system/bin 下。这个扩展过的启动进程会将一个额外的jar包添加到环境变量，并在特定场合调用里面的方法。比如：当虚拟机创建完成后和Zygote的main方法被调用前。并且在那个方法当中，我们已经是Zygote的一部分，而且能够在它的上下文context中活动。</p>
+<p>jar包的位置是 /data/data/de.robv.android.xposed.installer/bin/XposedBridge.jar 它的源代码可以在<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge">这里</a>找到。查看<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/blob/master/src/de/robv/android/xposed/XposedBridge.java">XposedBridge</a>的类，你能找到main方法。这就是我上文中所写过的，它在每个进程的最开始部分被调用。一些初始化的工作在那里完成，并且我们的模块在那里加载（之后我再讲模块的加载）。</p>
+<h2 id="方法的hook替换"># 方法的hook/替换</h2>
+<p>真正使Xpoesed有威力的就是hook方法调用。当你反编译并修改APK时，你能够在任何你想的地方直接修改/替换指令。然而，你事后需要重新编译/给APK签名，并且只能发布整个安装包。使用Xposed能让你放置的hook，你并不能修改程序内部的方法代码(清楚地定义你想要在何处做什么样的修改是不可能的)。然而，你可以在方法调用的前后注入你的代码。这也是java中能够被清楚寻址的最小单位。</p>
+<p>XposedBridge 有一个私有的 native 方法叫做 hookMethodNative。这个方法也在扩展后的 app_process 中被实现了。它会将方法类型转为“native”，并把方法的实现与本地的通用方法相连。这意味着，每当被hook的方法调用后，调用者不知道实际调用的是通用的方法。在这个方法中，位于 XposedBridge 的 handleHookedMethod 方法会被调用，并向方法调用传递参数、this指针以及其他东西。之后这个方法负责唤起之前方法调用注册过的回调。上述这些行为能够改变调用的参数、实例/静态变量、唤起其他方法、处理调用结果。。。或者跳过这些东西。它的弹性非常大。</p>
+<p>好了，理论讲够了。我们现在创建一个模块吧！</p>
+<h2 id="创建工程"># 创建工程</h2>
+<p>一个模块就是一个普通的app，只不过多了一些特殊的文件和元数据。所以在我们创建新的android工程以前，我假设你已经做过这个了。如果没有，<a target="_blank" rel="noopener" href="http://developer.android.com/sdk/installing.html">官方文档</a>讲的很详细。对于SDK，我选择了4.0.3（API15）。我建议你也使用这个，并且不要立刻开始。你不需要创建Activity，因为我们的修改不需要任何用户界面。回答过了这个问题后，你应该有一个空白的工程项目。</p>
+<h2 id="使工程成为xposed模块"># 使工程成为Xposed模块</h2>
+<p>现在我们把工程变成Xposed能加载的东西。我们需要以下几个步骤。</p>
+<h2 id="androidmanifest.xml">AndroidManifest.xml</h2>
+<p>Xposed Installer的模块列表搜寻所有有一种特殊元数据标记的应用程序。你可以到 AndroidManifest.xml =&gt; Application =&gt; Application Nodes (在底部) =&gt; Add =&gt; Meta Data 下面去创建这个标记。标记名称应该是 xposedmodule ，值应该是 true。给resource留空。重复以上过程创建 xposedminversion (见下文) 和 xposeddescription (你创建的模块的简单描述)。XML文件现在就是这个样子：</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+ &lt;manifest  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;de.robv.android.xposed.mods.tutorial&quot;
+    android:versionCode=&quot;1&quot;
+    android:versionName=&quot;1.0&quot; &gt;
+
+    &lt;uses-sdk android:minSdkVersion=&quot;15&quot; /&gt;
+
+    &lt;application
+        android:icon=&quot;@drawable/ic_launcher&quot;
+        android:label=&quot;@string/app_name&quot; &gt;
+        &lt;meta-data
+            android:name=&quot;xposedmodule&quot;
+            android:value=&quot;true&quot; /&gt;
+        &lt;meta-data
+            android:name=&quot;xposeddescription&quot;
+            android:value=&quot;Easy example which makes the status bar clock red and adds a smiley&quot; /&gt;
+        &lt;meta-data
+            android:name=&quot;xposedminversion&quot;
+            android:value=&quot;30&quot; /&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;</code></pre>
+<h2 id="xposedbridgeapi.jar">XposedBridgeApi.jar</h2>
+<p>接下来，让程序能够找到 XposedBridge 的API。你可以从 <a target="_blank" rel="noopener" href="http://forum.xda-developers.com/xposed/xposed-api-changelog-t2714067">这里</a>下载 <code>XposedBridgeApi-&lt;version&gt;.jar</code> 的最新版。把它复制到叫做lib的子文件夹下。右键单击选择Build Path =&gt; Add to Build Path。文件名当中的<code>&lt;version&gt;</code>是你在manifest文件的xposedminversion标签所插入的版本。</p>
+<blockquote>
+<p>保证API类没有被包含（但仅仅是参考）在你编译过的APK里，否则你会得到一个IllegalAccessError错误。libs（含有s）文件夹是eclipse自动生成的，不要把API文件放在那里。</p>
+</blockquote>
+<h2 id="模块的实现">模块的实现</h2>
+<p>现在你可以给你的模块创建一个类了。我的类叫做”Tutorial”，位于de.robv.android.xposed.mods.tutorial这个包中。</p>
+<pre><code>package de.robv.android.xposed.mods.tutorial;
+
+public class Tutorial &#123;
+
+&#125;</code></pre>
+<p>第一步，我们仅仅生成一些日志表明模块已经加载。一个模块可以有多个入口点。你选择哪个取决于你想修改什么。你可以在安卓系统启动时、在一个app将要启动时、在一个app的资源文件初始化时或其他时候，调用一个函数。</p>
+<p>在这个教程靠后面的一部分，你将了解到在一个特定的app中需要做出的修改。那么先让我们了解一下 “让我知道什么时候加载一个新app” 这个入口点。所有入口点都被标记为IXposedMod的子接口。这种情况下，你需要实现 IXposedHookLoadPackage 这个接口。其实它只有一个仅有一个参数的方法。这个方法向被实现的模块提供更多关于运行环境上下文的信息。在我们的例子中，我们用log输出加载的app的名称。</p>
+<pre><code>package de.robv.android.xposed.mods.tutorial;
+
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+public class Tutorial implements IXposedHookLoadPackage &#123;
+    public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable &#123;
+        XposedBridge.log(&quot;Loaded app: &quot; + lpparam.packageName);
+    &#125;
+&#125;</code></pre>
+<p>这个log方法向标准logcat以及 /data/data/de.robv.android.xposed.installer/log/debug.log（通过Xposed Installer可以轻易访问到）输出信息（tag Xposed）。</p>
+<h2 id="assetsxposed_init">assets/xposed_init</h2>
+<p>现在唯一遗漏的就是提示XposedBridge哪些类包含了入口点。这项工作通过一个叫 xposed_init 的文件完成。在assets文件夹下创建一个新的名叫xposed_init的text文件。在该文件中每行包含一个类的全名。在这个例子中，它是 de.robv.android.xposed.mods.tutorial.Tutorial。</p>
+<h2 id="试试看"># 试试看</h2>
+<p>保存你的文件。以Android Application的方式运行你的程序。因为这是你第一次安装它，在使用前你需要先启用。打开Xposed Installer这个app并确保你安装了xposed框架。之后切换到Modules标签。你应该能在那里找到你的app。在选择框内打钩使得它可用。然后重启。你当然什么变化也看不到，但如果检查log记录，以应该会看见以下的东西：</p>
+<pre><code>Loading Xposed (for Zygote)...
+Loading modules from   /data/app/de.robv.android.xposed.mods.tutorial-1.apk
+Loading class de.robv.android.xposed.mods.tutorial.Tutorial
+Loaded app: com.android.systemui
+Loaded app: com.android.settings
+... (many more apps follow)</code></pre>
+<p>瞧！它起作用了。现在你拥有了一个Xposed模块。它能够变得比写一些log更加有用…</p>
+<h2 id="探索你的目标并寻找修改它的方式"># 探索你的目标并寻找修改它的方式</h2>
+<p>好了，下面要开始讲的部分也许会非常不同，这取决于你想做什么。如果你之前修改过apk，也许你会知道在这里应当如何思考。总的来说，你需要了解目标的一些实现细节。在本教程中，目标选定为状态栏的时钟。这有助于了解到状态栏以及其他一些东西都是系统UI的一部分。现在让我们在那里开始我们的探索。</p>
+<p>可能性1：反汇编。这会告诉你它实际的实现，但是会很难阅读和理解，因为你得到的都是smali格式的东西。可能性2：获得AOSP源代码。比如<a target="_blank" rel="noopener" href="http://source.android.com/source/downloading.html">这里</a>，<a target="_blank" rel="noopener" href="http://grepcode.com/snapshot/repository.grepcode.com/java/ext/com.google.android/android/4.0.3_r1/">这里</a>。ROM不同代码也很不一样，但在本例中他们的实现是相似的甚至是相同的。我会先看AOSP，然后看看这么做够不够。如果我需要细节，我会看看实际的反汇编的代码。</p>
+<p>你可以找找名称中有“clock”的类。其他需要找的是用到的资源和布局。如果你下载官方的AOSP代码，你可以从 frameworks/base/packages/SystemUI 开始找。你会找到好几处“clock”出现的地方。找到有好几种方式实现修改是正常而且真实的。时刻记住你“只能” hook方法。所以你必须另找其他能够插入代码实现功能的地方，要么在方法的前面或是后面，或者是替换掉方法。你应当hook一个尽可能明确的方法，而不是一个被调用成千上万次的用于解决性能问题和非计划中的副作用的方法。</p>
+<p>在本例当中，你或许会发现布局 res/layout/status_bar.xml 包含一个指向带有类com.android.systemui.statusbar.policy.Clock的自定义view。现在你脑子里也许会有好多点子。文字的颜色是通过textAppearance属性定义的，所以最干净的更改它的方法就是修改外观的定义。然而，用Xposed框架改变外观属性几乎是不可能的（这需要深入本地代码）。替换状态栏的布局也许是可能的，但对于你试图做出的小小修改来说是杀鸡用牛刀。取而代之的是，看看这个类。有一个叫updateLock的方法，似乎每分钟都调用一次用于更新时间。</p>
+<pre><code>final void updateClock() &#123;
+    mCalendar.setTimeInMillis(System.currentTimeMillis());
+    setText(getSmallTime());
+&#125;</code></pre>
+<p>这个方法用于修改来说是很好的，因为这是一个足够具体的看似唯一能够修改时钟文字的方法。如果我们在这个方法的每次调用之后都加些修改时钟文字和颜色的东西，应该就能起作用。那么，我们开始做吧。</p>
+<blockquote>
+<p>对于单独修改字体颜色部分，有一种更好的办法。参见“<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Replacing-resources">替换资源</a>”中“修改布局”的例子。</p>
+</blockquote>
+<h2 id="使用反射寻找并hook方法"># 使用反射寻找并hook方法</h2>
+<p>现在我们已经知道了哪些东西？我们在com.android.systemui.statusbar.policy.Clock有一个叫做updateClock的希望干涉的方法。我们在系统UI资源中找到了这个类，所以它仅仅在系统UI进程当中有效。其它一些类属于框架，而且在任何地方都有效。如果我们在 handleLoadPackage 中试图直接获取任何这个类的信息和引用，就会失败。因为处于错误的进程中。所以让我们实现一种仅在某个特定包即将加载时执行特定代码的情况：</p>
+<pre><code>public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable &#123;
+    if (!lpparam.packageName.equals(&quot;com.android.systemui&quot;))
+        return;
+
+    XposedBridge.log(&quot;we are in SystemUI!&quot;);
+&#125;</code></pre>
+<p>使用参数，我们能轻松检查是否在正确的包中。一旦我们核实了这一点，我们就通过ClassLoader取得那个包中的也被这个变量引用的类。现在我们可以寻找com.android.systemui.statusbar.policy.Clock这个类以及它的updateClock方法，然后告诉XposedBridge去hook这个方法：</p>
+<pre><code>package de.robv.android.xposed.mods.tutorial;
+
+import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+public class Tutorial implements IXposedHookLoadPackage &#123;
+    public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable &#123;
+        if (!lpparam.packageName.equals(&quot;com.android.systemui&quot;))
+            return;
+
+        findAndHookMethod(&quot;com.android.systemui.statusbar.policy.Clock&quot;, lpparam.classLoader, &quot;updateClock&quot;, new XC_MethodHook() &#123;
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable &#123;
+                // this will be called before the clock was updated by the original method
+            &#125;
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable &#123;
+                // this will be called after the clock was updated by the original method
+            &#125;
+    &#125;);
+    &#125;
+&#125;</code></pre>
+<p>findAndHookMethod是一个<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Helpers">Helper</a>函数。注意静态导入，如果你像连接中说的一样做了，那就会被自动加入。这个方法使用系统UI包的ClassLoader寻找 Clock 这个类，然后寻找其中的updateClock方法。如果这个方法中有任何参数，你必须事后列出这些参数的类型。有许多方法做这件事，但因为我们的方法没有参数，所以就先跳过这个步骤。至于最后一点，你需要提供一个 XC_MethodHook 类的实现。对于更小的更改，你可以使用匿名类。如果你的代码很多，最好创建普通的类并且只在这里创建实例。helper之后会如之前所说的，做出所有hook这个方法的必要工作。</p>
+<p>XC_MethodHook中有两个你可以重写的方法。你可以两个都重写，或者都不重写。但后者的做法显然是没有道理的。这些方法就是beforeHookedMethod 和 afterHookedMethod。不难猜出他们在原有方法之前/后执行。你可以使用“before”方法在方法调用前估计/操纵参数（通过param.args）。甚至阻止调用原来的方法（发送你自己的结果）。“after”方法可以用来做一些基于原来方法的结果的事。你也可以在这个地方操纵结果。当然，你可以在方法调用的前/后添加你自己要执行的代码。</p>
+<blockquote>
+<p>如果你要彻底替换一个方法，去看看子类XC_MethodReplacement。在那里，你只需要重写replaceHookedMethod。</p>
+</blockquote>
+<p>XposedBridge为每个hook过的方法维护一个注册过的回调的表。拥有最高优先级（在hookMethod中被定义）的将被优先调用。原有的方法总是具有最低的优先级。所以如果你hook了一个拥有回调A（高优先级）和回调B（默认优先级）的方法，那么不管被hook的方法是如何被调用的，执行顺序总是这样的：A.before -&gt; B.before -&gt; original method -&gt; B.after -&gt; A.after。所以A可以影响B看到的参数，即把它们传递下去以前大幅度地修改它们。原有的方法的结果会先被B处理，但是A拥有原先调用者最终将得到什么样结果的决定权。</p>
+<h2 id="最终步骤在方法调用之前后执行你自己的代码">最终步骤：在方法调用之前/后执行你自己的代码</h2>
+<p>好了，你已经在正确的上下文运行环境中（比如：系统UI进程）有了一个在updateClock方法每次被调用时都会被调用的方法。现在让我们修改一些东西吧。</p>
+<p>第一个要检查的：我们有具体的Clock类型的引用么？是的，我们有。这就是param.thisObject参数。所以如果方法通过myClock.updateClock()被调用，那么param.thisObject 就是 myClock。</p>
+<p>接下来：我们对clock做什么？Clock类型并不可用，你不能将param.thisObject转换为类（也不要试着这样做）。然而它是从TextView继承而来。所以一旦你把Clock的引用转换为TextView，你可以使用像setText, getText 和 setTextColor之类的方法。我们的改动应该在原有的方法设置了新的时间以后进行。因为在方法被调用前什么都没有做，我们可以空着beforeHookedMethod。没有必要调用（空的）“super”方法。</p>
+<p>所以以下是完整的源代码：</p>
+<pre><code>package de.robv.android.xposed.mods.tutorial;
+
+import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import android.graphics.Color;
+import android.widget.TextView;
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+public class Tutorial implements IXposedHookLoadPackage &#123;
+    public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable &#123;
+        if (!lpparam.packageName.equals(&quot;com.android.systemui&quot;))
+            return;
+
+        findAndHookMethod(&quot;com.android.systemui.statusbar.policy.Clock&quot;, lpparam.classLoader, &quot;updateClock&quot;, new XC_MethodHook() &#123;
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable &#123;
+                TextView tv = (TextView) param.thisObject;
+                String text = tv.getText().toString();
+                tv.setText(text + &quot; :)&quot;);
+                tv.setTextColor(Color.RED);
+            &#125;
+        &#125;);
+    &#125;
+&#125;</code></pre>
+<h2 id="对结果感到满意"># 对结果感到满意</h2>
+<p>现在启动/安装你的app。因为你第一次启动它时已经在Xposed Installer中把它设置为了可用，你就不需要在做这一步了。重启即可。然而，如果你正在使用这个红色钟表的例子，你也许想禁用它。两者都对它们的updateClock 处理程序使用了默认的优先级。所以你不清楚哪个会胜出（实际上这依赖于处理方法的字符串表示形式，但不要依赖这个方式）。</p>
+<h2 id="结论"># 结论</h2>
+<p>我知道这个教程很长。但我希望你现在不但能实现一个绿色的表，也能够做出一些完全不同的东西。找到好的被hook的方法是经验的问题，所以先从简单的做起。试着一开始多使用log函数确保每次调用都是你预期的。现在：祝玩得开心!</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/02/06/GitIgnore/" rel="prev" title="GitIgnore使用">
+      <i class="fa fa-chevron-left"></i> GitIgnore使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/02/11/Xposed-helpers/" rel="next" title="（译）Xposed Helpers">
+      （译）Xposed Helpers <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%B8%BB%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text"># 修改主题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xposed%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text"># Xposed如何工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E7%9A%84hook%E6%9B%BF%E6%8D%A2"><span class="nav-number">3.</span> <span class="nav-text"># 方法的hook&#x2F;替换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B7%A5%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text"># 创建工程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E5%B7%A5%E7%A8%8B%E6%88%90%E4%B8%BAxposed%E6%A8%A1%E5%9D%97"><span class="nav-number">5.</span> <span class="nav-text"># 使工程成为Xposed模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#androidmanifest.xml"><span class="nav-number">6.</span> <span class="nav-text">AndroidManifest.xml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xposedbridgeapi.jar"><span class="nav-number">7.</span> <span class="nav-text">XposedBridgeApi.jar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.</span> <span class="nav-text">模块的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assetsxposed_init"><span class="nav-number">9.</span> <span class="nav-text">assets&#x2F;xposed_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%95%E8%AF%95%E7%9C%8B"><span class="nav-number">10.</span> <span class="nav-text"># 试试看</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2%E4%BD%A0%E7%9A%84%E7%9B%AE%E6%A0%87%E5%B9%B6%E5%AF%BB%E6%89%BE%E4%BF%AE%E6%94%B9%E5%AE%83%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">11.</span> <span class="nav-text"># 探索你的目标并寻找修改它的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%8F%8D%E5%B0%84%E5%AF%BB%E6%89%BE%E5%B9%B6hook%E6%96%B9%E6%B3%95"><span class="nav-number">12.</span> <span class="nav-text"># 使用反射寻找并hook方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E6%AD%A5%E9%AA%A4%E5%9C%A8%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D%E5%90%8E%E6%89%A7%E8%A1%8C%E4%BD%A0%E8%87%AA%E5%B7%B1%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-number">13.</span> <span class="nav-text">最终步骤：在方法调用之前&#x2F;后执行你自己的代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E7%BB%93%E6%9E%9C%E6%84%9F%E5%88%B0%E6%BB%A1%E6%84%8F"><span class="nav-number">14.</span> <span class="nav-text"># 对结果感到满意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">15.</span> <span class="nav-text"># 结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="头一次在Kaggle上做比赛。网上说从101类型的开始，都是教学类型的比赛，于是就找了一个好做的做做先。 不知道为什么，Numpy不能自动并行矩阵运算。然后python的多线程不能同时在多核环境上跑。所以写了一个多进程的版本。 放代码： import multiprocessing import csv from numpy import*  def readTrainFile():     m&#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Numpy多进程的 KNN 手写识别器">
+<meta property="og:url" content="http://example.com/2015/08/04/KNN-digit-recognizer/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="头一次在Kaggle上做比赛。网上说从101类型的开始，都是教学类型的比赛，于是就找了一个好做的做做先。 不知道为什么，Numpy不能自动并行矩阵运算。然后python的多线程不能同时在多核环境上跑。所以写了一个多进程的版本。 放代码： import multiprocessing import csv from numpy import*  def readTrainFile():     m&#x3D;">
+<meta property="og:locale">
+<meta property="article:published_time" content="2015-08-04T15:37:30.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.970Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="机器学习">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2015/08/04/KNN-digit-recognizer/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>Numpy多进程的 KNN 手写识别器 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2015/08/04/KNN-digit-recognizer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Numpy多进程的 KNN 手写识别器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2015-08-04 23:37:30" itemprop="dateCreated datePublished" datetime="2015-08-04T23:37:30+08:00">2015-08-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>头一次在Kaggle上做比赛。网上说从101类型的开始，都是教学类型的比赛，于是就找了一个好做的做做先。</p>
+<p>不知道为什么，Numpy不能自动并行矩阵运算。然后python的多线程不能同时在多核环境上跑。所以写了一个多进程的版本。</p>
+<p>放代码：</p>
+<pre><code>import multiprocessing
+import csv
+from numpy import*
+
+def readTrainFile():
+    m=[]
+    with open(&#39;train.csv&#39;, &#39;rb&#39;) as trainer:
+        rawfile=csv.reader(trainer)
+        for row in rawfile:
+            m.append(row)
+    m.remove(m[0])
+    for row in m:
+        row[0]=int(row[0])
+        for i in xrange(1,size(row)):
+            if(row[i]!=&#39;0&#39;):
+                row[i]=1
+            else:
+                row[i]=0
+    return mat(m)
+    
+def readTestFile():
+    m=[]
+    with open(&#39;test.csv&#39;, &#39;rb&#39;) as tester:
+        rawfile=csv.reader(tester)
+        for row in rawfile:
+            m.append(row)
+    m.remove(m[0])
+    for row in m:
+        for i in xrange(size(row)):
+            if(row[i]!=&#39;0&#39;):
+                row[i]=1
+            else:
+                row[i]=0
+    return mat(m)
+    
+def worker(trainMat, unknownMat, k, cpu_id, pipe):
+    trainSize=trainMat.shape[0]
+    unknownSize=unknownMat.shape[0]
+    
+    comMat=mat(zeros((trainSize, trainMat.shape[1]-1)))
+    sample=mat(zeros((trainSize, trainMat.shape[1]-1)))
+    sorter=mat(zeros((trainSize,2)))
+    sortedId=zeros((trainSize,1)) 
+    result=[]
+    voter=zeros((10,1))
+    
+    for no in xrange(unknownSize):
+        voter=zeros((10,1))
+        sample=unknownMat[no,:]
+        comMat=tile(sample, (trainSize,1)) - trainMat[:,1:]
+        comMat=mat(array(comMat)**2)
+        sorter[:,0]=trainMat[:,0]
+        sorter[:,1]=comMat.sum(axis=1)
+        sortedId=sorter[:,1].argsort(axis=0)
+        for i in xrange(k):
+            vote=int(sorter[:,0][sortedId[i]])
+            voter[vote]=voter[vote]+1
+        result.append(voter.argmax())
+        print &quot;This is &quot;,no,&quot; th sample in CPU No.&quot;, cpu_id
+    pipe.send(array(result))
+
+def saveRes(result):
+    with open(&#39;res.csv&#39;, &#39;wb&#39;) as resFile:
+        writer=csv.writer(resFile)
+        writer.writerow([&#39;ImageId&#39;, &#39;Label&#39;])
+        r=zeros((result.shape[0],2))
+        r[:,0]=array(range(1,result.size+1))
+        r[:,1]=result
+        for i in r.tolist():
+            i[0]=int(i[0])
+            i[1]=int(i[1])
+            writer.writerow(i)
+
+def collector(r_pipe, pipes):
+    res=[]
+    for p in pipes:
+        res.extend(p.recv().tolist())
+    res=array(res)
+    r_pipe.send(res)
+
+if __name__ == &quot;__main__&quot;:
+    train_set=readTrainFile()
+    test_set=readTestFile()
+    k=1
+    print &quot;Read file ok! k= &quot;,k
+    
+    cpu_n=multiprocessing.cpu_count()
+    b_size=test_set.shape[0]/cpu_n
+    process=[]
+    pipes=[]
+    print b_size, cpu_n
+    for i in xrange(cpu_n):
+        pipe=multiprocessing.Pipe()
+        p = multiprocessing.Process(target = worker, 
+            args = (train_set, test_set[i*b_size:(i+1)*b_size,:], k, i, pipe[0], ))
+        process.append(p)
+        pipes.append(pipe[1])
+        p.start()
+    
+    pipe=multiprocessing.Pipe()
+    r_pipe=pipe[1]
+    collect_process=multiprocessing.Process(target = collector, args=(pipe[0], pipes,))
+    collect_process.start()
+    res=r_pipe.recv()
+    saveRes(res)
+    
+    command=raw_input(&quot;Press a to terminate processes!&quot;)
+    if(command==&#39;a&#39;):
+        for p in process:
+            p.terminate()
+            </code></pre>
+<p>所有的训练样本用上大概需要跑4个小时。大概占用2.5G内存，并且运行时有500MB的波动（可能python写得太搓了，中间有对象不断生成然后释放，以后还会改这份代码）。比单进程的版本要快3倍。我的电脑是AMD A8的四核笔记本，内存8G。Numpy用的是Ubuntu包管理器里的。会不会用Intel的MKL重新编译一下会好些呢？这个以后也可以尝试一下。这份代码跑出来的准确率是0.96271，这个准确率比较靠后了。不管是k值取1还是3准确率都相同。难道取更大些好？因为KNN算法效率实在太渣，所以不打算继续在这个方法上再做尝试了。也许应该换些别的算法。看见有人把准确率弄到100%，简直丧心病狂。</p>
+<p>头一次做kaggle还是挺有收获的，主要体验了一把python的多进程还有实际应用场景。这只是个尝试性的测验，以后还可以再做改进。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/07/07/half_univ_life/" rel="prev" title="大学二分之一过后的感想">
+      <i class="fa fa-chevron-left"></i> 大学二分之一过后的感想
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/08/11/kd-tree/" rel="next" title="KD-Tree">
+      KD-Tree <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

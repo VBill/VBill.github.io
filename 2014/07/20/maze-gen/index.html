@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="这学期开始时本来打算写个自动生成迷宫的程序。但当时水平所限，写不出来。假期这两天把这个想法付诸实施，现在想想这个程序挺有意思的。 程序和道理都非常简单，有些类似于走迷宫。 思路是这样： 1.首先假设迷宫场地是充满墙壁没有道路的。我们的工作其实就是把迷宫“挖”出来。不妨把开始时的迷宫看成一些小的“房间”，每个“房间”四面都被墙壁包围。画迷宫的过程实际就是从一个房间随机走到另一个房间，走的过程中把墙壁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="迷宫自动生成程序">
+<meta property="og:url" content="http://example.com/2014/07/20/maze-gen/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="这学期开始时本来打算写个自动生成迷宫的程序。但当时水平所限，写不出来。假期这两天把这个想法付诸实施，现在想想这个程序挺有意思的。 程序和道理都非常简单，有些类似于走迷宫。 思路是这样： 1.首先假设迷宫场地是充满墙壁没有道路的。我们的工作其实就是把迷宫“挖”出来。不妨把开始时的迷宫看成一些小的“房间”，每个“房间”四面都被墙壁包围。画迷宫的过程实际就是从一个房间随机走到另一个房间，走的过程中把墙壁">
+<meta property="og:locale">
+<meta property="article:published_time" content="2014-07-20T08:56:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.970Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2014/07/20/maze-gen/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>迷宫自动生成程序 | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2014/07/20/maze-gen/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          迷宫自动生成程序
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-07-20 16:56:00" itemprop="dateCreated datePublished" datetime="2014-07-20T16:56:00+08:00">2014-07-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这学期开始时本来打算写个自动生成迷宫的程序。但当时水平所限，写不出来。假期这两天把这个想法付诸实施，现在想想这个程序挺有意思的。</p>
+<p>程序和道理都非常简单，有些类似于走迷宫。</p>
+<p>思路是这样：</p>
+<p>1.首先假设迷宫场地是充满墙壁没有道路的。我们的工作其实就是把迷宫“挖”出来。不妨把开始时的迷宫看成一些小的“房间”，每个“房间”四面都被墙壁包围。画迷宫的过程实际就是从一个房间随机走到另一个房间，走的过程中把墙壁“挖掉”。定义一个类，这个类的每个对象代表迷宫里的一个格子，里面存放了这块墙壁或房间是否被挖过，以及它是否是一个“房间”。选好一个房间作为起点（我选的左上角），然后开始随机挖。</p>
+<p>2.到达一个房间时判断四周房间的情况。按照四个方向判断。如果其中一个方向的隔壁房间挖过了，就不要把这个方向记录下来。如果四周都不能挖了，就一路退回之前能挖的地方。再次随机一个新方向，继续挖。（有点类似走迷宫的过程）</p>
+<p>程序中记录道路用了C++STL里的栈。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;ctime&gt;
+#include &lt;cstdlib&gt;
+#include &lt;stack&gt;
+#include &lt;vector&gt;
+#define M 25   //迷宫的规模
+using namespace std;
+
+class Grid&#123;
+public:
+    bool cell, dig;
+&#125;;
+//迷宫格子类型，记录了是否被挖过
+Grid maze[M][M];
+stack&lt;int&gt; row_s, col_s;
+//用来存放路径的栈
+void Init()&#123;
+    for(int i=0; i&lt;M; i++)&#123;
+        for(int j=0; j&lt;M; j++)&#123;
+            maze[i][j].dig=false;
+            if(i%2!=0 &amp;&amp; j%2!=0)
+                maze[i][j].cell=true;
+        &#125;
+    &#125;
+    row_s.push(1);    col_s.push(1);
+    srand(time(0));
+&#125;
+//初始化迷宫格子
+int DirRand()&#123;
+    vector &lt;int&gt; dirlist;        //用来记录可选择的方向
+    int result=0;
+    int row=row_s.top(), col=col_s.top();
+    //0 up, 1 down, 2 left, 3 right
+    if(row-2&gt;0 &amp;&amp; !maze[row-2][col].dig) dirlist.push_back(0);
+    if(row+2&lt;M-1 &amp;&amp; !maze[row+2][col].dig) dirlist.push_back(1);
+    if(col-2&gt;0 &amp;&amp; !maze[row][col-2].dig) dirlist.push_back(2);
+    if(col+2&lt;M-1 &amp;&amp; !maze[row][col+2].dig) dirlist.push_back(3);
+    if(dirlist.size()==0) result=-1;
+    else result=dirlist[rand()%((int)dirlist.size())];
+    return result;
+&#125;
+//判断周围情况，没有可挖的格子时返回-1
+void GenMaze()&#123;
+    while(!row_s.empty() &amp;&amp; !col_s.empty())&#123;
+        int dir=DirRand();
+        int row=row_s.top(), col=col_s.top();
+        if(dir!=-1)&#123;     //前进
+            if(dir==0)&#123;
+                maze[row-2][col].dig=maze[row-1][col].dig=true;
+                row_s.push(row-2);  col_s.push(col);
+            &#125;else if(dir==1)&#123;
+                maze[row+2][col].dig=maze[row+1][col].dig=true;
+                row_s.push(row+2);  col_s.push(col);
+            &#125;else if(dir==2)&#123;
+                maze[row][col-2].dig=maze[row][col-1].dig=true;
+                row_s.push(row);    col_s.push(col-2);
+            &#125;else if(dir==3)&#123;
+                maze[row][col+2].dig=maze[row][col+1].dig=true;
+                row_s.push(row);    col_s.push(col+2);
+            &#125;
+        &#125;else&#123;
+            row_s.pop();    col_s.pop();        //后退
+        &#125;
+    &#125;
+&#125;
+
+void OutMaze()&#123;      //输出迷宫
+    for(int i=0; i&lt;M; i++)&#123;
+        for(int j=0; j&lt;M; j++)&#123;
+            if(maze[i][j].cell || maze[i][j].dig)
+            cout&lt;&lt;&quot;  &quot;;
+            else cout&lt;&lt;&quot;##&quot;;        //为了保证对齐，墙壁和道路宽都是2个字符
+        &#125;
+        cout&lt;&lt;endl;
+    &#125;
+&#125;
+
+int main()&#123;
+    Init();
+    GenMaze();
+    OutMaze();
+    return 0;
+&#125;</code></pre>
+<p>算法主要参考：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Maze_generation_algorithm">http://en.wikipedia.org/wiki/Maze_generation_algorithm</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/07/15/linux-shellscript-wireless-card-compile/" rel="prev" title="利用Linux Shellscript 安装网卡驱动">
+      <i class="fa fa-chevron-left"></i> 利用Linux Shellscript 安装网卡驱动
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/07/27/mybatis-0toadcq/" rel="next" title="mybatis 从零基础到增删改查数据库">
+      mybatis 从零基础到增删改查数据库 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

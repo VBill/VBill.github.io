@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一个多月前在成电OJ上看到一个并查集的问题，当时刚看完一些基础的数据结构，所以就试着做了。当然没有做出来。这题坑就在于：每组测试数据有10^5个，地图还是1000*1000的。挨着个每次都搜一遍不太可能。容易超时。 解决方法：潮水高度是递增的。所以想象一个退潮的过程，把每次退潮露出的岛屿记录下来，从最后最高的潮水高度算起。把露出的岛屿加入集合，每个测试数据对应的答案可以接着在下一组继续使用。 Is">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个并查集问题的优化（CDOJ203）">
+<meta property="og:url" content="http://example.com/2014/07/14/mfset-optimize-cdoj203/index.html">
+<meta property="og:site_name" content="BillVYoung&#39;s Blog">
+<meta property="og:description" content="一个多月前在成电OJ上看到一个并查集的问题，当时刚看完一些基础的数据结构，所以就试着做了。当然没有做出来。这题坑就在于：每组测试数据有10^5个，地图还是1000*1000的。挨着个每次都搜一遍不太可能。容易超时。 解决方法：潮水高度是递增的。所以想象一个退潮的过程，把每次退潮露出的岛屿记录下来，从最后最高的潮水高度算起。把露出的岛屿加入集合，每个测试数据对应的答案可以接着在下一组继续使用。 Is">
+<meta property="og:locale">
+<meta property="article:published_time" content="2014-07-14T15:15:00.000Z">
+<meta property="article:modified_time" content="2020-10-18T09:29:14.974Z">
+<meta property="article:author" content="BillVYoung">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2014/07/14/mfset-optimize-cdoj203/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'default'
+  };
+</script>
+
+  <title>一个并查集问题的优化（CDOJ203） | BillVYoung's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BillVYoung's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="default">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2014/07/14/mfset-optimize-cdoj203/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一个并查集问题的优化（CDOJ203）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-07-14 23:15:00" itemprop="dateCreated datePublished" datetime="2014-07-14T23:15:00+08:00">2014-07-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>一个多月前在成电OJ上看到一个并查集的问题，当时刚看完一些基础的数据结构，所以就试着做了。当然没有做出来。这题坑就在于：每组测试数据有10^5个，地图还是1000*1000的。挨着个每次都搜一遍不太可能。容易超时。</p>
+<p>解决方法：潮水高度是递增的。所以想象一个退潮的过程，把每次退潮露出的岛屿记录下来，从最后最高的潮水高度算起。把露出的岛屿加入集合，每个测试数据对应的答案可以接着在下一组继续使用。</p>
+<h1 id="islands">Islands</h1>
+<blockquote>
+<p>Deep in the Carribean, there is an island even stranger than the Monkey Island, dwelled by Horatio Torquemada Marley. Not only it has a rectangular shape, but is also divided into an n×m grid. Each grid field has a certain height. Unfortunately, the sea level started to raise and in year i, the level is i meters. Another strange feature of the island is that it is made of sponge, and the water can freely flow through it. Thus, a grid field whose height is at most the current sea level is considered flooded.Adjacent unflooded fields (i.e., sharing common edge) create unflooded areas. Sailors are interested in the number of unflooded areas in a given year.</p>
+</blockquote>
+<blockquote>
+<p>An example of a 4×5 island is given below. Numbers denote the heights of respective fields in meters.Unflooded fields are darker; there are two unflooded areas in the first year and three areas in the second year.</p>
+</blockquote>
+<blockquote>
+<p>Input</p>
+</blockquote>
+<blockquote>
+<p>Multiple Test Cases</p>
+</blockquote>
+<blockquote>
+<p>The input contains several test cases. The first line of the input contains a positive integer Z≤20,denoting the number of test cases. Then Z test cases follow, each conforming to the format described in section Single Instance Input. For each test case, your program has to write an output conforming to the format described in section Single Instance Output.</p>
+</blockquote>
+<blockquote>
+<p>Single Instance Input</p>
+</blockquote>
+<blockquote>
+<p>The first line contains two numbers n and m separated by a single space, the dimensions of the island, where 1≤n,m≤1000. Next n lines contain m integers from the range [1,10^9] separated by single spaces, denoting the heights of the respective fields. Next line contains an integer T (1≤T≤105). The last line contains T integers tj , separated by single spaces, such that 0≤t1≤t2≤⋯≤tT≤10^9</p>
+</blockquote>
+<blockquote>
+<p>Output</p>
+</blockquote>
+<blockquote>
+<p>Single Instance Output</p>
+</blockquote>
+<blockquote>
+<p>Your program should output a single line consisting of T numbers rj , where rj is the number of unflooded areas in year tj . After every number ,you must output a single space</p>
+</blockquote>
+<blockquote>
+<p>Sample Input</p>
+</blockquote>
+<blockquote>
+<p>1</p>
+</blockquote>
+<blockquote>
+<p>4 5</p>
+</blockquote>
+<blockquote>
+<p>1 2 3 3 1</p>
+</blockquote>
+<blockquote>
+<p>1 3 2 2 1</p>
+</blockquote>
+<blockquote>
+<p>2 1 3 4 3</p>
+</blockquote>
+<blockquote>
+<p>1 2 2 2 2</p>
+</blockquote>
+<blockquote>
+<p>5</p>
+</blockquote>
+<blockquote>
+<p>1 2 3 4 5</p>
+</blockquote>
+<blockquote>
+<p>Sample Output</p>
+</blockquote>
+<blockquote>
+<p>2 3 1 0 0</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+class Field&#123;
+public:
+    int height, father;
+    bool under;
+&#125;;
+
+int Z;  int row, col, T;
+int res[100000];
+vector&lt;int&gt; height_list[100000];
+vector&lt;int&gt; t;
+int i,j,result,temp;
+Field field[1000][1000];
+int Father(int a, int b)&#123;
+    if (field[a][b].father!=a*col+b)
+        field[a][b].father=Father(field[a][b].father/col, field[a][b].father%col);
+    return field[a][b].father;
+&#125;
+
+void Merge(int a, int b, int c, int d)&#123;
+    int f1, f2, x, y;
+    f1=Father(a, b);    f2=Father(c, d);
+    if(f1==f2) return;
+    else&#123;
+        result--;
+        x=field[a][b].father/col;
+        y=field[a][b].father%col;
+        field[x][y].father=f2;
+    &#125;
+&#125;
+
+void Check(int r, int c)&#123;
+    if (r+1&lt;row &amp;&amp; !field[r+1][c].under) &#123;Merge(r, c, r+1, c); &#125;
+    if (r-1&gt;=0 &amp;&amp; !field[r-1][c].under) &#123;Merge(r, c, r-1, c); &#125;
+    if (c+1&lt;col &amp;&amp; !field[r][c+1].under) &#123;Merge(r, c, r, c+1); &#125;
+    if (c-1&gt;=0 &amp;&amp; !field[r][c-1].under) &#123;Merge(r, c, r, c-1); &#125;
+&#125;
+
+void Solve()&#123;
+    int x, y, m, n;
+    result=0;
+    for(m=t.size()-1; m&gt;=0; m--)&#123;
+        for(n=height_list[m].size()-1; n&gt;=0; n--)&#123;
+            x=height_list[m][n]/col;   y=height_list[m][n]%col;
+            field[x][y].under=false;
+            result++;   Check(x, y);
+        &#125;
+        res[m]=result;
+    &#125;
+&#125;
+
+int main()&#123;
+    scanf(&quot;%d&quot;, &amp;Z);
+    while(Z--)&#123;
+        result=0;
+        t.clear();
+        for (i=0; i&lt;100000; i++) height_list[i].clear();
+
+        scanf(&quot;%d%d&quot;, &amp;row, &amp;col);
+        for(i=0; i&lt;row; i++)&#123;
+            for(j=0; j&lt;col; j++)&#123;
+                scanf(&quot;%d&quot;, &amp;field[i][j].height);
+                field[i][j].under=true;
+                field[i][j].father=i*col+j;
+            &#125;
+        &#125;
+
+        scanf(&quot;%d&quot;, &amp;T);
+        for(i=0; i&lt;T; i++)&#123;
+            scanf(&quot;%d&quot;, &amp;temp);
+            t.push_back(temp);
+        &#125;
+
+        for(i=0; i&lt;row; i++)&#123;
+            for(j=0; j&lt;col; j++)&#123;
+                temp=lower_bound(t.begin(), t.end(), field[i][j].height)-t.begin();
+                if(temp&gt;0) height_list[temp-1].push_back(i*col+j);
+            &#125;
+        &#125;
+        Solve();
+        for(i=0; i&lt;(int)t.size(); i++) printf(&quot;%d &quot;, res[i]);
+        printf(&quot;\n&quot;);
+    &#125;
+    return 0;
+&#125;</code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" rel="tag"># 数据结构与算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/05/31/dp-longest-decreasing-sequence/" rel="prev" title="动态规划--寻找最长递减子序列">
+      <i class="fa fa-chevron-left"></i> 动态规划--寻找最长递减子序列
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/07/14/two-segtree-basic-problems/" rel="next" title="两个线段树的基础问题">
+      两个线段树的基础问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MTc3My8yODI1NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#islands"><span class="nav-number">1.</span> <span class="nav-text">Islands</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BillVYoung</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BillVYoung</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
