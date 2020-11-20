@@ -157,6 +157,459 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2014/07/27/mybatis-0toadcq/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="一个普通的Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2014/07/27/mybatis-0toadcq/" class="post-title-link" itemprop="url">mybatis 从零基础到增删改查数据库</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2014-07-27 16:02:00" itemprop="dateCreated datePublished" datetime="2014-07-27T16:02:00+08:00">2014-07-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 19:29:30" itemprop="dateModified" datetime="2020-10-18T19:29:30+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本文是mybatis框架一个初步的入门总结，最全的最好的资料应该参考<a target="_blank" rel="noopener" href="http://mybatis.github.io/mybatis-3/zh/index.html">这个</a></p>
+<p>本文在Eclipse下搭建一个小程序可以测试mybatis对mysql数据库进行增删改查这几个基本功能。</p>
+<p>1.首先建立数据库，我建立的数据库叫test，编码是UTF-8，里面有两张表，它们是这样的：</p>
+<figure>
+<img src="/img/mybatis_0toadcq/1.png" alt="" /><figcaption>pic1</figcaption>
+</figure>
+<p>两张表的数据我填的是这样的，当然可以随便填，不过最好在person中有1个以上name相同的，后面会用到：</p>
+<figure>
+<img src="/img/mybatis_0toadcq/2.png" alt="" /><figcaption>pic2</figcaption>
+</figure>
+<p>2.在ECLIPISE下建立DYNAMIC WEB PROJECT，别忘了在BUILD PATH下加入mybatis和mysql的jar包。这个工程的布局是这样的：</p>
+<p>文件和类的用途后面解释</p>
+<figure>
+<img src="/img/mybatis_0toadcq/3.png" alt="" /><figcaption>pic3</figcaption>
+</figure>
+<p>Main里面有程序的static void main函数。Test类封装了测试mybatis框架功能的函数。xml都是框架的配置文件。Person与Student是DTO数据传输对象。两个Mapper类都是接口类，用途后面讲。</p>
+<p>3.配置Configuration.xml。在src文件夹下先建立这个文件。</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE configuration PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;
+&quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;
+&lt;configuration&gt;
+    &lt;typeAliases&gt; 
+        &lt;typeAlias alias=&quot;Person&quot; type=&quot;com.ymy.mybatis.model.Person&quot;/&gt; 
+        &lt;typeAlias alias=&quot;Student&quot; type=&quot;com.ymy.mybatis.model.Student&quot;/&gt; 
+        &lt;!-- short name of java classes --&gt;
+    &lt;/typeAliases&gt; 
+
+    &lt;environments default=&quot;development&quot;&gt;
+        &lt;environment id=&quot;development&quot;&gt;
+            &lt;!--
+            choose any name for default and id
+              --&gt;
+        &lt;transactionManager type=&quot;JDBC&quot;/&gt;
+            &lt;dataSource type=&quot;POOLED&quot;&gt;
+            &lt;property name=&quot;driver&quot; value=&quot;com.mysql.jdbc.Driver&quot;/&gt;
+            &lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://127.0.0.1:3306/test&quot;/&gt;
+            &lt;property name=&quot;username&quot; value=&quot;root&quot;/&gt;
+            &lt;property name=&quot;password&quot; value=&quot;31415926&quot;/&gt;
+            &lt;property name=&quot;driver.encoding&quot; value=&quot;UTF8&quot;/&gt;
+            &lt;!--property name=&quot;PROPERTY NAME&quot; value=&quot;$&#123;var name&#125;&quot;/--&gt;
+            &lt;/dataSource&gt;
+        &lt;/environment&gt;
+    &lt;/environments&gt;
+    
+    &lt;mappers&gt;
+        &lt;mapper resource=&quot;com/ymy/mybatis/model/Person.xml&quot;/&gt;
+        &lt;mapper resource=&quot;com/ymy/mybatis/model/Student.xml&quot;/&gt;
+        &lt;!-- xml of mapper class --&gt;
+    &lt;/mappers&gt;
+&lt;/configuration&gt;</code></pre>
+<p>标签解释：</p>
+<pre><code>&lt;typeAliases&gt; 定义的是别名，全名是type里的一大串，起个别名减少了后面的书写量。
+
+&lt;environments&gt;和&lt;environment&gt;配置了数据库的信息，一个environments下可以配多个environment来访问多个数据库，这超出了本文讨论范围。这个文章：http://zhangbo-peipei-163-com.iteye.com/blog/2052924讲了多数据源配置。
+
+&lt;property name&gt;和value改成自己的数据库的就行了
+
+&lt;mappers&gt;下定义多个&lt;mapper&gt;每个mapper对应一个DTO类型，以及它们对应的数据库操作。mapper resource后面是对应DTO的xml文件的实际位置。</code></pre>
+<p>3.建立DTO类Student和Person。</p>
+<p>Student类:</p>
+<pre><code>package com.ymy.mybatis.model;
+
+public class Student &#123;
+    private int id;
+    private String name;
+    private int score;
+
+    public Student() &#123;
+    &#125;
+
+    public int getID() &#123;
+        return id;
+    &#125;
+
+    public void setID(int id) &#123;
+        this.id = id;
+    &#125;
+
+    public String getName() &#123;
+        return name;
+    &#125;
+
+    public void setName(String name) &#123;
+        this.name = name;
+    &#125;
+
+    public int getScore() &#123;
+        return score;
+    &#125;
+
+    public void setScore(int score) &#123;
+        this.score = score;
+    &#125;
+&#125;</code></pre>
+<p>Person类：</p>
+<pre><code>package com.ymy.mybatis.model;
+
+public class Person &#123;
+    private int id;
+    private String name;
+    private int age;
+    private String address;
+
+    public Person(String name, int age, String address) &#123;
+        this.name = name;
+        this.age = age;
+        this.address = address;
+    &#125;
+
+    public Person(int id, String name, int age, String address) &#123;
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.address = address;
+    &#125;
+
+    public Person() &#123;
+    &#125;
+
+    public int getId() &#123;
+        return id;
+    &#125;
+
+    public void setId(int id) &#123;
+        this.id = id;
+    &#125;
+
+    public String getName() &#123;
+        return name;
+    &#125;
+
+    public void setName(String name) &#123;
+        this.name = name;
+    &#125;
+
+    public int getAge() &#123;
+        return age;
+    &#125;
+
+    public void setAge(int age) &#123;
+        this.age = age;
+    &#125;
+
+    public String getAddress() &#123;
+        return address;
+    &#125;
+
+    public void setUserAddress(String userAddress) &#123;
+        this.address = userAddress;
+    &#125;
+&#125;</code></pre>
+<p>4.配置Student.xml</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; 
+&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+
+&lt;mapper namespace=&quot;com.ymy.mybatis.model.StudentMapper&quot;&gt;
+  &lt;select id=&quot;selectStudentByID&quot; parameterType=&quot;int&quot; resultType=&quot;Student&quot;&gt;
+     select * from student where id = #&#123;id&#125;
+ &lt;/select&gt;
+&lt;/mapper&gt;</code></pre>
+<p>解释：&lt; mapper namespace &gt;那句，相当于在命名空间com.ymy.mybatis.model.StudentMapper下定义了一个叫selectStudentByID的语句，它接收的参数类型（parameterType）为int，返回类型为Student。到后面我们定义了接口类StudentMapper，mybatis就会把接口中的函数和xml中的定义绑定。&lt; select &gt;标签说明这是查询类型的操作。</p>
+<p>接口类StudentMapper：</p>
+<pre><code>package com.ymy.mybatis.model;
+
+public interface StudentMapper &#123;
+    public Student selectStudentByID(int id);
+&#125;</code></pre>
+<p>配置Person.xml</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; 
+&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+
+&lt;mapper namespace=&quot;com.ymy.mybatis.model.PersonMapper&quot;&gt;
+     &lt;resultMap id=&quot;personResultMap&quot; type=&quot;Person&quot;&gt;
+            &lt;id property=&quot;id&quot; column=&quot;id&quot; /&gt;
+             &lt;result property=&quot;name&quot; column=&quot;name&quot;/&gt;
+             &lt;result property=&quot;age&quot; column=&quot;age&quot;/&gt;
+             &lt;result property=&quot;address&quot; column=&quot;address&quot;/&gt;
+    &lt;/resultMap&gt;
+
+    &lt;select id=&quot;selectPersonByID&quot; parameterType=&quot;int&quot; resultType=&quot;Person&quot;&gt;
+         select * from person where id = #&#123;id&#125;
+    &lt;/select&gt;
+
+    &lt;select id=&quot;selectPersonByName&quot; parameterType=&quot;String&quot; resultMap=&quot;personResultMap&quot;&gt;
+         select * from person where name = #&#123;name&#125;
+    &lt;/select&gt;
+
+    &lt;select id=&quot;lastInsertId&quot; resultType=&quot;int&quot;&gt;
+          select last_insert_id()
+    &lt;/select&gt;
+
+    &lt;insert id=&quot;addPerson&quot; parameterType=&quot;Person&quot;&gt;
+            insert into person (id,name,age,address)
+            values (NULL,#&#123;name&#125;,#&#123;age&#125;,#&#123;address&#125;)
+    &lt;/insert&gt;
+
+    &lt;update id=&quot;updatePerson&quot; parameterType=&quot;Person&quot;&gt;
+            update person set
+            name = #&#123;name&#125;,
+            age = #&#123;age&#125;,
+            address= #&#123;address&#125;
+            where id = #&#123;id&#125;
+    &lt;/update&gt;
+
+    &lt;delete id=&quot;deletePerson&quot; parameterType=&quot;int&quot;&gt;
+         delete from person where id = #&#123;id&#125;
+    &lt;/delete&gt;
+&lt;/mapper&gt;</code></pre>
+<p>看sql语句就知道都是干啥的了，增删改查已经全了。重点是selectPersonByName。数据库里有重名的人，所以会查询到多个人。这时返回类型标签成了resultMap。值为personResultMap。文件最前面定义了personResultMap。result里面property是DTO里变量的名称。column和数据库里的名称对应。</p>
+<p>接口类PersonMapper:</p>
+<pre><code>package com.ymy.mybatis.model;
+
+import java.util.List;
+
+public interface PersonMapper &#123;
+    public Person selectPersonByID(int id);
+    public List&lt;Person&gt; selectPersonByName(String name);
+    
+    public void addPerson(Person person);
+    public void deletePerson(int id);
+    public void updatePerson(Person person);
+    public int lastInsertId();
+&#125;</code></pre>
+<p>5.写测试代码：</p>
+<p>Test类：</p>
+<pre><code>package com.ymy.mybatis.test;
+
+import java.io.*;
+import java.util.*;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import com.ymy.mybatis.model.*;
+
+public class Test &#123;
+    private static SqlSessionFactory sqlSessionFactory;
+    // it should be static
+    // every thread should have its own SqlSession instance
+    private static Reader reader;
+    static &#123;
+        try &#123;
+            reader = Resources.getResourceAsReader(&quot;Configuration.xml&quot;);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+            // every database should have its own SqlSessionFactory
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+        &#125;
+    &#125;
+
+    public void getPersonList(String userName) &#123;
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            PersonMapper mapper = session.getMapper(PersonMapper.class);
+            List&lt;Person&gt; people = mapper.selectPersonByName(userName);
+            for (Person person : people) &#123;
+                System.out.print(&quot;Name: &quot; + person.getName() + &quot;\t&quot;);
+                System.out.print(&quot;Age: &quot; + person.getAge() + &quot;\t&quot;);
+                System.out.println(&quot;Addr: &quot; + person.getAddress());
+            &#125;
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+
+    public void addPerson() &#123;
+        @SuppressWarnings(&quot;resource&quot;)
+        Scanner inputer = new Scanner(System.in);
+        System.out.println(&quot;Input a person&#39;s name age and address&quot;);
+        String name = inputer.next();
+        int age = inputer.nextInt();
+        String address = inputer.next();
+
+        Person newPerson = new Person(name, age, address);
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            PersonMapper mapper = session.getMapper(PersonMapper.class);
+            mapper.addPerson(newPerson);
+            int last_id = mapper.lastInsertId();
+            System.out.println(&quot;Insert id = &quot; + last_id);
+            session.commit();
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+    
+    public void updatePerson() &#123;
+        @SuppressWarnings(&quot;resource&quot;)
+        Scanner inputer = new Scanner(System.in);
+        System.out.println(&quot;Input a person&#39;s id, name, age and address&quot;);
+        int id = inputer.nextInt();
+        String name = inputer.next();
+        int age = inputer.nextInt();
+        String address = inputer.next();
+
+        Person person = new Person(id, name, age, address);
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            PersonMapper mapper = session.getMapper(PersonMapper.class);
+            mapper.updatePerson(person);
+            session.commit();
+            System.out.println(&quot;OK!&quot;);
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+
+    public void deletePerson() &#123;
+        @SuppressWarnings(&quot;resource&quot;)
+        Scanner inputer = new Scanner(System.in);
+        System.out.println(&quot;Input an id to delete:&quot;);
+        int id = inputer.nextInt();
+
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            PersonMapper mapper = session.getMapper(PersonMapper.class);
+            mapper.deletePerson(id);
+            session.commit();
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+    
+    public void selectPersonById()&#123;
+        @SuppressWarnings(&quot;resource&quot;)
+        Scanner inputer = new Scanner(System.in);
+        System.out.println(&quot;Input an id to select:&quot;);
+        int id = inputer.nextInt();
+        
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            PersonMapper mapper = session.getMapper(PersonMapper.class);
+            Person person = mapper.selectPersonByID(id);
+            System.out.print(&quot;Name: &quot; + person.getName() + &quot;\t&quot;);
+            System.out.print(&quot;Age: &quot; + person.getAge() + &quot;\t&quot;);
+            System.out.println(&quot;Addr: &quot; + person.getAddress());
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+    
+    public void selectStudentById()&#123;
+        @SuppressWarnings(&quot;resource&quot;)
+        Scanner inputer = new Scanner(System.in);
+        System.out.println(&quot;Input an student id to select:&quot;);
+        int id = inputer.nextInt();
+        
+        SqlSession session = sqlSessionFactory.openSession();
+        try &#123;
+            StudentMapper mapper = session.getMapper(StudentMapper.class);
+            Student student = mapper.selectStudentByID(id);
+            System.out.print(&quot;Name: &quot; + student.getName() + &quot;\t&quot;);
+            System.out.print(&quot;ID: &quot; + student.getID() + &quot;\t&quot;);
+            System.out.println(&quot;Score: &quot; + student.getScore());
+        &#125; finally &#123;
+            session.close();
+        &#125;
+    &#125;
+    
+&#125;</code></pre>
+<p>解释：我们通过SqlSession类的对象获取映射（使用getMapper方法），通过映射调用Student和Person接口类里的函数。SqlSession参与数据库的管理事务。当执行了修改数据库内容的语句后调用commit()方法讲更改的内容写入数据库。完成后及时关闭SqlSession对象，调用close()方法。</p>
+<p>最后写Main类，然后运行程序：</p>
+<pre><code>package com.ymy.mybatis.test;
+
+public class Main &#123;
+    public static void main(String[] args) &#123;
+        Test t1 = new Test();
+        t1.selectPersonById();
+        t1.getPersonList(&quot;Bill&quot;);// find Bill
+        t1.addPerson();
+        t1.deletePerson();
+        t1.updatePerson();
+        
+        t1.selectStudentById();
+    &#125;
+&#125;</code></pre>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2014/07/20/maze-gen/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1510,20 +1963,20 @@ int main()
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

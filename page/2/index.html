@@ -157,6 +157,106 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2016/01/08/primenumbers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="一个普通的Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/01/08/primenumbers/" class="post-title-link" itemprop="url">质数表的生成以及质数的判断</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-01-08 01:01:35" itemprop="dateCreated datePublished" datetime="2016-01-08T01:01:35+08:00">2016-01-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>最近看了一个问题，涉及到质数的判断。以前没有留意过这方面的方法。但是特意找了下资料发现自己解决这个问题的方法还是很笨的，网上有许多更好的方法。这里做个简单的总结。</p>
+<h1 id="生成质数表">生成质数表</h1>
+<p>首先最笨的办法是生成一个表来判断。以前上离散数学的时候讲过可以用筛法求这个表。把这个表先算出来显然是很划算的。但是，生成这个表也有好和不好的方法。</p>
+<h2 id="eratosthenes筛法">Eratosthenes筛法</h2>
+<p>给出要筛数值的范围<span class="math inline">\(\sqrt(n)\)</span>，然后把范围内2的倍数划去，然后找到第一个没被划去的数。再把这个数的倍数划去，然后再找第一个没被划去的数，如此重复。。。</p>
+<h2 id="欧拉筛法">欧拉筛法</h2>
+<p>这个方法比上一个筛法要快很多。原因是上一个算法会重复筛某些数（尽管标记为已经筛除，但是还是要判断）。比如说6会被2和3筛去。这个方法主要思想就是每个合数只被最小的质因数筛掉。</p>
+<pre><code>void gen()&#123;
+    for(int i=2; i&lt;=N; i++)&#123;
+        if(!check[i])&#123;//没被划去的i，是质数
+            prime[total++]=i;
+            isPrime[i] = true;
+        &#125;
+        for(int j=0; j&lt;total; j++)&#123;
+            int t = i*prime[j];//i和之前所有的质数相乘
+            if(t&gt;N)break;
+            check[t] = true;//筛掉
+            if(i%prime[j]==0)break;
+            //保证了每个合数只会被它的最小素因子筛掉
+        &#125;
+    &#125;//end enum
+&#125;</code></pre>
+<p>上面代码prime是保存质数的，而isPrime是一个标记数组。查表判断就靠isPrime了，N是范围。</p>
+<h2 id="只生成一部分质数表">只生成一部分质数表</h2>
+<p>上面的方法尽管高效但是浪费空间，而且要判断的数字比较大的时候，事先要准备一个比较大的表，计算起来也是比较费事的。折衷的方法是生成一部分表。表内的最大质数为可能检测的最大数的平方根。这样小于平方根的直接判断，大于平方根的可以从表头循环检查能否整除待检测的数。</p>
+<h1 id="拉宾-米勒测试">拉宾-米勒测试</h1>
+<p>这种方法不用生成表。但是给出的结果不一定准确。多次测试的话，可以减小误判的概率。详细的介绍见<a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=fsFu6ZZ3HCIqSvy2a151aPV2_F2C5l2c0eoZl5w9pZ5FGy0oTjWTEZ1KoADySIPBxW_-POySLExSPo6ccGcnzq">链接</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2016/01/01/mathjax/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1418,159 +1518,6 @@ public interface IXposedHookZygoteInit extends IXposedMod &#123;
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2015/02/12/Xposed-replacing-resources/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BillVYoung">
-      <meta itemprop="description" content="一个普通的Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BillVYoung's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2015/02/12/Xposed-replacing-resources/" class="post-title-link" itemprop="url">（译）Xposed-替换资源</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2015-02-12 20:18:08" itemprop="dateCreated datePublished" datetime="2015-02-12T20:18:08+08:00">2015-02-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>这是Xposed在github上的最后一篇教程。<a target="_blank" rel="noopener" href="https://github.com/rovo89/XposedBridge/wiki/Replacing-resources">原文地址</a></p>
-<p>Xposed使得替换资源，比如：图像和字符串之类的事变得容易。下面是做法：</p>
-<h2 id="简单的资源"># 简单的资源</h2>
-<pre><code>@Override
-public void initZygote(IXposedHookZygoteInit.StartupParam startupParam) throws Throwable &#123;
-    XResources.setSystemWideReplacement(&quot;android&quot;, &quot;bool&quot;, &quot;config_unplugTurnsOnScreen&quot;, false);
-&#125;
-
-@Override
-public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
-    // replacements only for SystemUI
-    if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
-        return;
-
-    // different ways to specify the resources to be replaced
-    resparam.res.setReplacement(0x7f080083, &quot;YEAH!&quot;); // WLAN toggle text. You should not do this because the id is not fixed. Only for framework resources, you could use android.R.string.something
-    resparam.res.setReplacement(&quot;com.android.systemui:string/quickpanel_bluetooth_text&quot;, &quot;WOO!&quot;);
-    resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;string&quot;, &quot;quickpanel_gps_text&quot;, &quot;HOO!&quot;);
-    resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;integer&quot;, &quot;config_maxLevelOfSignalStrengthIndicator&quot;, 6);
-&#125;</code></pre>
-<p>这就是“简单”的替换，通过这种方式你可以直接替换值。这种方式可以用于：Boolean, Color, Integer, int[], String and String[]。</p>
-<p>如你所见，有几种不同的设置替换资源的方式。对于构成安卓框架一部分的所有地方都应该被替换的资源（对所有的app都可用），你应在<code>initZygote</code>中调用<code>XResources.setSystemWideReplacement(...)</code>方法。对于特定app的资源，你需要核实过你确实在正确的app之后在<code>hookInitPackageResources</code>中调用<code>res.setReplacement</code>。这时你不应使用<code>setSystemWideReplacement</code>因为可能会产生你无法预料的副作用。</p>
-<p>替换Drawable也采用相似的办法。然而你不能只使用Drawable作为替换物，因为这可能导致同一个Drawable实例被不同的ImageViews引用。因此，你需要使用包装器：</p>
-<pre><code>resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;status_bar_background&quot;, new XResources.DrawableLoader() &#123;
-    @Override
-    public Drawable newDrawable(XResources res, int id) throws Throwable &#123;
-        return new ColorDrawable(Color.WHITE);
-    &#125;
-&#125;);</code></pre>
-<h2 id="复杂资源"># 复杂资源</h2>
-<p>更加复杂的资源（比如动画类型的Drawable）必须从你的模块资源当中被引用。我们假设你想要替换电池图标。下面是代码：</p>
-<pre><code>package de.robv.android.xposed.mods.coloredcirclebattery;
-
-import android.content.res.XModuleResources;
-import de.robv.android.xposed.IXposedHookInitPackageResources;
-import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
-
-public class ColoredCircleBattery implements IXposedHookZygoteInit, IXposedHookInitPackageResources &#123;
-    private static String MODULE_PATH = null;
-
-    @Override
-    public void initZygote(StartupParam startupParam) throws Throwable &#123;
-        MODULE_PATH = startupParam.modulePath;
-    &#125;
-
-    @Override
-    public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
-        if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
-            return;
-
-        XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, resparam.res);
-        resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;stat_sys_battery&quot;, modRes.fwd(R.drawable.battery_icon));
-        resparam.res.setReplacement(&quot;com.android.systemui&quot;, &quot;drawable&quot;, &quot;stat_sys_battery_charge&quot;, modRes.fwd(R.drawable.battery_icon_charge));
-    &#125;
-&#125;</code></pre>
-<blockquote>
-<p>你可以随意命名你的替换资源。我选择 batterry_icon 替代 stat_sys_battery 让它们在本文中更好区分。</p>
-</blockquote>
-<p>之后把 “battery_icon” 和 “battery_icon_charge” 这两个Drawable添加到你的模块当中。最简单的情况是添加 “res/drawables/battery_icon.png” 和 “res/drawables/battery_icon_charge.png”。但是你可以使用Android提供的所有方式来定义资源。所以对于动画图标，你可使用带有<code>animation-list</code>和其它Drawable资源引用的XML文件。当然这个XML文件也必须放在你的模块内。</p>
-<p>通过这些替换，你能要求Xposed将所有指向特定资源的请求跳到你自己的模块。这同样意味着你可以利用<a target="_blank" rel="noopener" href="http://developer.android.com/guide/topics/resources/providing-resources.html#AlternativeResources">qualifier</a>，比如：如果你对landscape或更低的屏幕密度需要不同的资源。翻译也可以以相同的方式提供。同样，你也许需要这么做如果原来的资源使用qualifier。你不能仅仅替换一段文字的西班牙语版本。正如前面提到的，请求是向前的，所以它会完全被你的模块资源处理，并且不会察觉其它翻译的存在。</p>
-<p>这个技巧基本上对所有资源类型都有效。除了极个别的像主题之类的。</p>
-<h2 id="修改布局"># 修改布局</h2>
-<p>尽管理论上你可以用之前提到的技巧彻底替换布局，但这有很多坏处。你必须从原有布局中复制整个布局，这会降低对其它ROM的兼容性。主题也许回丢失。只有一个模块可以代替布局。如果两个模块都尝试这么做，后者将会胜出。最重要的是，其它资源的ID和引用是很难定义的。因此，我不推荐这样做。</p>
-<p>作为一种好的选择，你可以使用后填充的hook。下面是你怎么做：</p>
-<pre><code>@Override
-public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable &#123;
-    if (!resparam.packageName.equals(&quot;com.android.systemui&quot;))
-        return;
-
-    resparam.res.hookLayout(&quot;com.android.systemui&quot;, &quot;layout&quot;, &quot;status_bar&quot;, new XC_LayoutInflated() &#123;
-        @Override
-        public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable &#123;
-            TextView clock = (TextView) liparam.view.findViewById(
-                    liparam.res.getIdentifier(&quot;clock&quot;, &quot;id&quot;, &quot;com.android.systemui&quot;));
-            clock.setTextColor(Color.RED);
-        &#125;
-    &#125;); 
-&#125;</code></pre>
-<p>每当“status_bar”布局被填充时，回调方法<code>handleLayoutInflated</code>就被调用。在你以参数形式得到的LayoutInflatedParam对象中，你可以找到刚被创建的View并在需要时修改它。你同样会得到<code>resNames</code>用来鉴别这个方法因哪个布局而被调用（万一你对多个布局使用同一种方法），还有<code>variant</code>，比如可能包含<code>layout-land</code>，如果它就是被加载的布局的版本的话。<code>res</code>帮助你以布局从同一个来源得到ID或额外的资源。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1640,20 +1587,20 @@ public void handleInitPackageResources(InitPackageResourcesParam resparam) throw
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

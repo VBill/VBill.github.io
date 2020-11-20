@@ -157,6 +157,114 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
+    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2020/10/22/debug-tools/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BillVYoung">
+      <meta itemprop="description" content="一个普通的Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BillVYoung's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/22/debug-tools/" class="post-title-link" itemprop="url">常用调试工具的常用方法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-10-22 01:19:09" itemprop="dateCreated datePublished" datetime="2020-10-22T01:19:09+08:00">2020-10-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-11-21 00:28:56" itemprop="dateModified" datetime="2020-11-21T00:28:56+08:00">2020-11-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E4%BD%9C%E6%95%88%E7%8E%87/" itemprop="url" rel="index"><span itemprop="name">工作效率</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>简单记录下常用的调试工具，以及常用的方法。</p>
+<h1 id="gdb">gdb</h1>
+<h2 id="常用命令用法">常用命令用法</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">gdb &lt;program&gt; &lt;corefile&gt;  <span class="comment">#调试core dump file</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面是交互命令</span></span><br><span class="line"></span><br><span class="line">r/run 执行</span><br><span class="line">c/<span class="built_in">continue</span> 继续执行</span><br><span class="line">n/next 单步执行</span><br><span class="line">until 循环直到条件满足，或者跟一个行号</span><br><span class="line">p/pvector/pstack...  各种打印，尤其可以打印一些STL容器</span><br><span class="line">call 调用函数</span><br><span class="line">b n  在第n行设置断点</span><br><span class="line">l/list 打印源码</span><br><span class="line">bt 打印栈</span><br><span class="line">up/down 在栈上向上/下层移动</span><br><span class="line">frame 直接到某层栈</span><br><span class="line">watch 设置监视点</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这些命令大概可以覆盖90%以上的场景。</p>
+<h1 id="其他辅助工具">其他辅助工具</h1>
+<h2 id="lsof">lsof</h2>
+<p>如果直接加目录文件名，就是查看读写目录的进程情况。</p>
+<h3 id="常用参数">常用参数</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-p &lt;pid&gt; 列出进程文件读写情况</span><br><span class="line">-c &lt;name&gt; 列出name开头的进程读写文件的情况</span><br><span class="line">-i [46][protocol][@hostname|hostaddr][:service|port]  列出符合条件的网络连接</span><br></pre></td></tr></table></figure>
+<h2 id="ps">ps</h2>
+<p>一般只用<code>ps -efx</code></p>
+<h2 id="strace">strace</h2>
+<p>一般只用<code>strace -Ttt</code>定位程序耗时</p>
+<h2 id="gcore">gcore</h2>
+<p><code>gcore &lt;pid&gt;</code> 对正在执行的进程生成core文件。</p>
+<h2 id="pstack">pstack</h2>
+<p><code>pstack &lt;pid&gt;</code> 查看正在执行进程的栈。</p>
+<h2 id="ipcs">ipcs</h2>
+<p>直接使用即可。</p>
+<h2 id="iostat">iostat</h2>
+<p><code>watch -n 1 iostat</code> 或者 <code>iostat 1</code> 每秒统计一次IO信息。</p>
+<h2 id="vmstat">vmstat</h2>
+<p>直接使用即可。</p>
+<h2 id="valgrind">valgrind</h2>
+<p>这个工具非常复杂。入门可以看下边这2个：</p>
+<ul>
+<li>https://stackoverflow.com/questions/5134891/how-do-i-use-valgrind-to-find-memory-leaks。</li>
+<li>https://web.stanford.edu/class/archive/cs/cs107/cs107.1212/resources/valgrind.html</li>
+</ul>
+<p>手册：https://valgrind.org/docs/manual/manual.html</p>
+<h2 id="htop">htop</h2>
+<p>升级版的top，可视化做的好。尤其可以尝试tree模式（按F5），显示进程树关系。</p>
+<h2 id="iotop">iotop</h2>
+<p>类top工具，直接打开用就可以。但是感觉不太好用。。。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
     <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2020/08/09/new-blog2020/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1366,106 +1474,6 @@ int main()
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="">
-    <link itemprop="mainEntityOfPage" href="https://vbill.github.io/2016/01/08/primenumbers/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="BillVYoung">
-      <meta itemprop="description" content="一个普通的Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BillVYoung's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2016/01/08/primenumbers/" class="post-title-link" itemprop="url">质数表的生成以及质数的判断</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2016-01-08 01:01:35" itemprop="dateCreated datePublished" datetime="2016-01-08T01:01:35+08:00">2016-01-08</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-18 17:29:14" itemprop="dateModified" datetime="2020-10-18T17:29:14+08:00">2020-10-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近看了一个问题，涉及到质数的判断。以前没有留意过这方面的方法。但是特意找了下资料发现自己解决这个问题的方法还是很笨的，网上有许多更好的方法。这里做个简单的总结。</p>
-<h1 id="生成质数表">生成质数表</h1>
-<p>首先最笨的办法是生成一个表来判断。以前上离散数学的时候讲过可以用筛法求这个表。把这个表先算出来显然是很划算的。但是，生成这个表也有好和不好的方法。</p>
-<h2 id="eratosthenes筛法">Eratosthenes筛法</h2>
-<p>给出要筛数值的范围<span class="math inline">\(\sqrt(n)\)</span>，然后把范围内2的倍数划去，然后找到第一个没被划去的数。再把这个数的倍数划去，然后再找第一个没被划去的数，如此重复。。。</p>
-<h2 id="欧拉筛法">欧拉筛法</h2>
-<p>这个方法比上一个筛法要快很多。原因是上一个算法会重复筛某些数（尽管标记为已经筛除，但是还是要判断）。比如说6会被2和3筛去。这个方法主要思想就是每个合数只被最小的质因数筛掉。</p>
-<pre><code>void gen()&#123;
-    for(int i=2; i&lt;=N; i++)&#123;
-        if(!check[i])&#123;//没被划去的i，是质数
-            prime[total++]=i;
-            isPrime[i] = true;
-        &#125;
-        for(int j=0; j&lt;total; j++)&#123;
-            int t = i*prime[j];//i和之前所有的质数相乘
-            if(t&gt;N)break;
-            check[t] = true;//筛掉
-            if(i%prime[j]==0)break;
-            //保证了每个合数只会被它的最小素因子筛掉
-        &#125;
-    &#125;//end enum
-&#125;</code></pre>
-<p>上面代码prime是保存质数的，而isPrime是一个标记数组。查表判断就靠isPrime了，N是范围。</p>
-<h2 id="只生成一部分质数表">只生成一部分质数表</h2>
-<p>上面的方法尽管高效但是浪费空间，而且要判断的数字比较大的时候，事先要准备一个比较大的表，计算起来也是比较费事的。折衷的方法是生成一部分表。表内的最大质数为可能检测的最大数的平方根。这样小于平方根的直接判断，大于平方根的可以从表头循环检查能否整除待检测的数。</p>
-<h1 id="拉宾-米勒测试">拉宾-米勒测试</h1>
-<p>这种方法不用生成表。但是给出的结果不一定准确。多次测试的话，可以减小误判的概率。详细的介绍见<a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=fsFu6ZZ3HCIqSvy2a151aPV2_F2C5l2c0eoZl5w9pZ5FGy0oTjWTEZ1KoADySIPBxW_-POySLExSPo6ccGcnzq">链接</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1535,20 +1543,20 @@ int main()
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

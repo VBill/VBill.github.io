@@ -3355,4 +3355,50 @@ public class Tutorial implements IXposedHookLoadPackage &#123;
         <tag>Android</tag>
       </tags>
   </entry>
+  <entry>
+    <title>常用调试工具的常用方法</title>
+    <url>/2020/10/22/debug-tools/</url>
+    <content><![CDATA[<p>简单记录下常用的调试工具，以及常用的方法。</p>
+<h1 id="gdb">gdb</h1>
+<h2 id="常用命令用法">常用命令用法</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gdb &lt;program&gt; &lt;corefile&gt;  <span class="comment">#调试core dump file</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面是交互命令</span></span><br><span class="line"></span><br><span class="line">r/run 执行</span><br><span class="line">c/<span class="built_in">continue</span> 继续执行</span><br><span class="line">n/next 单步执行</span><br><span class="line">until 循环直到条件满足，或者跟一个行号</span><br><span class="line">p/pvector/pstack...  各种打印，尤其可以打印一些STL容器</span><br><span class="line">call 调用函数</span><br><span class="line">b n  在第n行设置断点</span><br><span class="line">l/list 打印源码</span><br><span class="line">bt 打印栈</span><br><span class="line">up/down 在栈上向上/下层移动</span><br><span class="line">frame 直接到某层栈</span><br><span class="line">watch 设置监视点</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这些命令大概可以覆盖90%以上的场景。</p>
+<h1 id="其他辅助工具">其他辅助工具</h1>
+<h2 id="lsof">lsof</h2>
+<p>如果直接加目录文件名，就是查看读写目录的进程情况。</p>
+<h3 id="常用参数">常用参数</h3>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-p &lt;pid&gt; 列出进程文件读写情况</span><br><span class="line">-c &lt;name&gt; 列出name开头的进程读写文件的情况</span><br><span class="line">-i [46][protocol][@hostname|hostaddr][:service|port]  列出符合条件的网络连接</span><br></pre></td></tr></table></figure>
+<h2 id="ps">ps</h2>
+<p>一般只用<code>ps -efx</code></p>
+<h2 id="strace">strace</h2>
+<p>一般只用<code>strace -Ttt</code>定位程序耗时</p>
+<h2 id="gcore">gcore</h2>
+<p><code>gcore &lt;pid&gt;</code> 对正在执行的进程生成core文件。</p>
+<h2 id="pstack">pstack</h2>
+<p><code>pstack &lt;pid&gt;</code> 查看正在执行进程的栈。</p>
+<h2 id="ipcs">ipcs</h2>
+<p>直接使用即可。</p>
+<h2 id="iostat">iostat</h2>
+<p><code>watch -n 1 iostat</code> 或者 <code>iostat 1</code> 每秒统计一次IO信息。</p>
+<h2 id="vmstat">vmstat</h2>
+<p>直接使用即可。</p>
+<h2 id="valgrind">valgrind</h2>
+<p>这个工具非常复杂。入门可以看下边这2个：</p>
+<ul>
+<li>https://stackoverflow.com/questions/5134891/how-do-i-use-valgrind-to-find-memory-leaks。</li>
+<li>https://web.stanford.edu/class/archive/cs/cs107/cs107.1212/resources/valgrind.html</li>
+</ul>
+<p>手册：https://valgrind.org/docs/manual/manual.html</p>
+<h2 id="htop">htop</h2>
+<p>升级版的top，可视化做的好。尤其可以尝试tree模式（按F5），显示进程树关系。</p>
+<h2 id="iotop">iotop</h2>
+<p>类top工具，直接打开用就可以。但是感觉不太好用。。。</p>
+]]></content>
+      <categories>
+        <category>工作效率</category>
+      </categories>
+      <tags>
+        <tag>工作效率</tag>
+      </tags>
+  </entry>
 </search>
